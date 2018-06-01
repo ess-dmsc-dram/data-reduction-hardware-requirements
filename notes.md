@@ -93,7 +93,7 @@ N_core_average = N_reduction * N_core * t_reduction / t_run
 Here:
 
 - `N_reduction` is the number of times data is reduced.
-  Typically this should be small, e.g., 1 or 2, but especially in the early days there will be exceptions.
+  Typically this should be small, e.g., 1, 2, or 3, but especially in the early days there will be exceptions.
 - `t_run` is the duration of a single run.
 
 For convenience, we can expand the master equation and obtain:
@@ -101,3 +101,6 @@ For convenience, we can expand the master equation and obtain:
 ```
 N_core_average = N_reduction * (N_core * (t_0 + N_event/bandwidth_max) + N_spec*t_spec + N_event*t_event) / t_run
 ```
+
+It is important to note that `N_core_everage` depends on `N_core`, i.e., the more cores we use, the higher our overall hardware requirement.
+Reasons for using more cores are primarily to (1) reduce the time for a single reduction to something that is acceptable for users, and (2) work around memory limitations on a single node.
