@@ -10,7 +10,7 @@
 With a couple of approximations (which are probably minor for this purpose and compared to other sources of uncertainty) we can describe the time required to reduce a set of data with the following formula:
 
 ```
-t = t_0 + (N_spec*t_spec + N_event*t_event)/N_core + N_event/bandwidth_max
+t_reduction = t_0 + (N_spec*t_spec + N_event*t_event)/N_core + N_event/bandwidth_max
 ```
 
 Here:
@@ -61,5 +61,43 @@ The rationale for this equation is as follows:
   Basically, this is a limit to the number of events that can be loaded per second.
   This will also depend on whether or not compression is used in NeXus files.
   We model this limit in the equation with the term `N_event/bandwidth_max`.
+  In case a parallel file system provides an bandwidth that is much higher on average than what was benchmarked for a local SSD, we may need to include a different term that captures limited scaling of the parallel loader.
 - The time for reducing a spectrum will often depend linearly on the bin count.
   However, for a given reduction workflow the bin count does not vary much, so there is not need to express it explicitly.
+
+## Experiments
+
+Experiments with a series of different workflows (SANS using the SANS2D workflow, powder diffraction using the `SNSPowderReduction` workflow for PG3, direct geometry using the `DgsReduction` workflow for CNCS) show a surprisingly consistent pattern, independent of the technique:
+
+- `t_0` is about 10 seconds.
+- `t_spec` is about 1/1.000 seconds, or slightly smaller.
+- `t_event` is about 1/1.000.0000 seconds, or slightly smaller.
+- `bandwidth_max` is about 1/50.000.000 seconds for an SSD, tests with a parallel file system are pending.
+
+## Interpretation
+
+The experiments show that any of the terms on the master equation can be relevant or even dominant, depending on the instrument and the number of used cores:
+
+- For instruments that produce many small files (few spectra and events), the `t_0` term can become dominant.
+  This can in theory be improved by processing multiple files in the same workflow, but at this point making such an assumption is not justified.
+  It is thus important to capture the typical run duration for each instrument.
+- For instruments with many events we may be using many cores to offset the reduction cost.
+  In that limit the bandwidth-limiting term becomes relevant.
+
+Based on the time for reducing a single run we can thus compute the average number of cores required for reducing data for the instrument (this does *not* include live reduction and interactive sessions):
+
+```
+N_core_average = N_reduction * N_core * t_reduction / t_run
+```
+
+Here:
+
+- `N_reduction` is the number of times data is reduced.
+  Typically this should be small, e.g., 1 or 2, but especially in the early days there will be exceptions.
+- `t_run` is the duration of a single run.
+
+For convenience, we can expand the master equation and obtain:
+
+```
+N_core_average = N_reduction * (N_core * (t_0 + N_event/bandwidth_max) + N_spec*t_spec + N_event*t_event) / t_run
+```
