@@ -4,6 +4,9 @@
 
 - Assume that the cluster is large, such that we do not need to take into account holes from a single job requiring a significant fraction of cores.
   The final result should probably be scaled by an appropriate fill factor, which DST/cluster admins should be able to provide based on past experience.
+- The following analysis is for MPI runs of Mantid.
+  The threading-based Mantid runs show a different (typically worse) scaling behavior with the number of available cores.
+  These result can thus not be used directly for estimating required hardware in a (GUI-based) interactive workflow.
 
 ## Performance master equation
 
@@ -24,7 +27,7 @@ Here:
 - `t_0` is a constant time specific to the reduction workflow.
   It includes anything that does not depend and the number of spectra or number of events.
   Typically this includes small parts of the time spend in every algorithm, time for loading experiment logs from NeXus files, time for loading auxiliary files, and other overheads.
-- `t_spec` is the (computed) time to run the workflow for a single spectra.
+- `t_spec` is the (computed) time to run the workflow for a single spectrum.
 - `t_event` is the (computed) time to run the workflow for a single event.
 - `bandwidth_max` is the number of events that can be loaded from the file system per second.
 
@@ -50,7 +53,7 @@ The rationale for this equation is as follows:
     = N_event*t_{event,linear} + N_event (log (N_event/N_spec) * t_{event,NlogN} + ...).
   ```
   The term in parenthesis depends on `log (N_event/N_spec)` and *not* `log N_event` (similar for higher order terms).
-  These terms are thus typically small and it is reasonable to absorb them into the linear term
+  These terms are thus typically small and it seems reasonable to absorb them into the linear term
   ```
     ~ N_event*t_event.
   ```
@@ -102,5 +105,15 @@ For convenience, we can expand the master equation and obtain:
 N_core_average = N_reduction * (N_core * (t_0 + N_event/bandwidth_max) + N_spec*t_spec + N_event*t_event) / t_run
 ```
 
-It is important to note that `N_core_everage` depends on `N_core`, i.e., the more cores we use, the higher our overall hardware requirement.
+It is important to note that `N_core_average` depends on `N_core`, i.e., the more cores we use, the higher our overall hardware requirement.
 Reasons for using more cores are primarily to (1) reduce the time for a single reduction to something that is acceptable for users, and (2) work around memory limitations on a single node.
+
+## Caveats and to dos
+
+- Saving large files.
+  We do not have any algorithms for parallel writing of files available.
+  Implementation would be beyond the scope of what we can afford for this analysis.
+  Will need to add a guessed cost for saving for workflows that produce large outputs?
+- `LoadEventNexus` performance for SSD, Lustre tests pending (and our installation is too small to give good performance).
+- Background included in event rates?
+  Unknown background?
