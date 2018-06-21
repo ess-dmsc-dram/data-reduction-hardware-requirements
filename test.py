@@ -44,7 +44,7 @@ loki.add_phase(750000)
 loki.add_phase(1500000)
 for name, rate in zip(configs['LoKI']['name'], configs['LoKI']['rate']):
     loki.add_config(name, rate/u.second, 1e8)
-loki.run([0.2, 0.5, 1.0, 2.0, 5.0], [2, 5])
+loki.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
 
 #ess.add_instrument('{}-phase1-{}'.format(instrument_name, config.name), InstrumentParams(num_pixel=750000, event_rate=config.rate, run_duration=required_events/config.rate, max_rate_compensation=1))
 

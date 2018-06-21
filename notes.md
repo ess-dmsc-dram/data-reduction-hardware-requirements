@@ -77,6 +77,8 @@ Experiments with a series of different workflows (SANS using the SANS2D workflow
 - `t_event` is about 1/1.000.0000 seconds, or slightly smaller.
 - `bandwidth_max` is about 1/50.000.000 seconds for an SSD, tests with a parallel file system are pending.
 
+These parameters are set in `performance_model.py`.
+
 ## Interpretation
 
 The experiments show that any of the terms on the master equation can be relevant or even dominant, depending on the instrument and the number of used cores:
@@ -117,3 +119,25 @@ Reasons for using more cores are primarily to (1) reduce the time for a single r
 - `LoadEventNexus` performance for SSD, Lustre tests pending (and our installation is too small to give good performance).
 - Background included in event rates?
   Unknown background?
+
+## Requirements
+
+As discussed above, the number of cores required for reduction depends on the required maximum runtime for a reduction.
+It is unclear what a good limit for this is.
+For now we define the following:
+
+1. In general the reduction should be 5 times faster than the experiment.
+1. It should never take more than 20 minutes.
+1. We never require a runtime below 30 seconds.
+
+This is currently set in `beamline.py`.
+
+First 8:
+- BEER
+- CSPEC
+- BIFROST
+- MAGIC
+- LOKI
+- ODIN
+- DREAM
+- ESTIA

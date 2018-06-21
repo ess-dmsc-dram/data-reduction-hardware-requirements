@@ -1,3 +1,4 @@
+from math import ceil
 from astropy import units as u
 
 from instrument import Instrument
@@ -21,11 +22,17 @@ class Beamline:
                 for power in accelerator_power:
                     reduced_rate = rate*power/5.0*phase/self.phases[-1]
                     run_duration = count/reduced_rate
-                    i = Instrument(phase, reduced_rate, run_duration)
-                    output = '{:4.1f} MW {:6} pixels {:7} {:20} n/s {:6.0} run[s] {:6.0f}'.format(power, self.name, phase, name, reduced_rate.value, run_duration.value)
-                    for factor in speedup:
-                        reduction_duration = run_duration/factor
-                        resources = i.required_resources(reduction_duration)
-                        output += ' | reduction[s] {:6.0f} cores {:3}'.format(reduction_duration.value, resources['cores'])
+                    # Typically we have to process a sample run together with a background run.
+                    # For now we assume that both have similar size, i.e., the effective number of
+                    # events in the reduction is twice that of the run:
+                    sample_and_background = 1 + 1
+                    i = Instrument(phase, sample_and_background*reduced_rate, run_duration)
+                    output = '{:4.1f} MW {:6} {:7} pixels {:20} {:6.0} n/s {:6.0f} run[s]'.format(power, self.name, phase, name, reduced_rate.value, run_duration.value)
+                    reduction_duration = min(max(run_duration/speedup, 30 * u.second), 1200 * u.second)
+                    resources = i.required_resources(reduction_duration)
+                    # Average cores takes into account reducing data several times.
+                    reductions_per_run = 2
+                    # TODO take into account that not 100% of time is measurement time?
+                    output += ' {:6.0f} reduction[s] {:3} cores {:4.0f} average-cores'.format(reduction_duration.value, resources['cores'], ceil(reductions_per_run*(reduction_duration/run_duration)*resources['cores']))
                     print(output)
 
