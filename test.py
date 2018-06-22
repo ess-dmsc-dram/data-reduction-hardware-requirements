@@ -37,6 +37,12 @@ configs['LoKI'] = {
     'name':['3m-high-flux', '3m-small-sample', '5m-high-flux', '5m-small-sample', '8m-high-flux', '8m-small-sample'],
     'rate':[1e7, 3.33e5, 1.92e6, 1.2e5, 7.5e5, 4.69e4],
     'use':[0.1, 0.1, 0.1, 0.3, 0.1, 0.3]}
+# Specular-high-intensity rate is up to 2e7 in total reflection (with two detector banks), but would be used usually for higher angles (only 5% in specular mode), use 2e6 as adjusted rate guess.
+configs['ESTIA'] = {
+    'name':['reference-high-intensity', 'reference-normal', 'specular-high-intensity', 'specular', 'off-specular'],
+    'rate':[1e8, 4e6, 2e6, 8e5, 8e5],
+    'count':[1e9, 1e9, 1e7, 1e7, 1e9],
+    'use':[0.01, 0.001, 0.05, 0.5, 0.5]}
 
 
 loki = Beamline('LoKI')
@@ -45,6 +51,13 @@ loki.add_phase(1500000)
 for name, rate in zip(configs['LoKI']['name'], configs['LoKI']['rate']):
     loki.add_config(name, rate/u.second, 1e8)
 loki.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
+
+estia = Beamline('ESTIA')
+estia.add_phase(250000)
+estia.add_phase(500000)
+for name, rate, count in zip(configs['ESTIA']['name'], configs['ESTIA']['rate'], configs['ESTIA']['count']):
+    estia.add_config(name, rate/u.second, count)
+estia.run([0.2, 0.5, 1.0, 2.0, 5.0], 2)
 
 #ess.add_instrument('{}-phase1-{}'.format(instrument_name, config.name), InstrumentParams(num_pixel=750000, event_rate=config.rate, run_duration=required_events/config.rate, max_rate_compensation=1))
 

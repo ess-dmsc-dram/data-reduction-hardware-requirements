@@ -3,6 +3,18 @@ from astropy import units as u
 
 from instrument import Instrument
 
+def memory_requirement(num_pixel, num_event, num_core):
+    # Assumptions:
+    # - Each core (MPI rank) requires a baseline of 1 GB.
+    # - The Instrument takes 256 Byte/pixel/core, but is assumed to be shared between workspaces.
+    # - We require 5 workspaces.
+    base_mem = 2**30 * u.byte
+    mem_per_pixel = 256 * u.byte
+    num_workspace = 5
+    num_bin = 1000
+    # TODO Include memory for meta-data?
+    return num_core*(base_mem + mem_per_pixel * num_pixel) + num_workspace*(num_pixel * num_bin * 3 * 8 * u.byte + num_event * 2 * 8 * u.byte)
+
 class Beamline:
     def __init__(self, name):
         self.name = name
@@ -27,12 +39,17 @@ class Beamline:
                     # events in the reduction is twice that of the run:
                     sample_and_background = 1 + 1
                     i = Instrument(phase, sample_and_background*reduced_rate, run_duration)
-                    output = '{:4.1f} MW {:6} {:7} pixels {:20} {:6.0} n/s {:6.0f} run[s]'.format(power, self.name, phase, name, reduced_rate.value, run_duration.value)
+                    output = '{:4.1f} MW {:6} {:7} pixels {:30} {:6.0} n/s {:6.0f} run[s]'.format(power, self.name, phase, name, reduced_rate.value, run_duration.value)
                     reduction_duration = min(max(run_duration/speedup, 30 * u.second), 1200 * u.second)
                     resources = i.required_resources(reduction_duration)
                     # Average cores takes into account reducing data several times.
                     reductions_per_run = 2
                     # TODO take into account that not 100% of time is measurement time?
-                    output += ' {:6.0f} reduction[s] {:3} cores {:4.0f} average-cores'.format(reduction_duration.value, resources['cores'], ceil(reductions_per_run*(reduction_duration/run_duration)*resources['cores']))
+                    cores = resources['cores']
+                    try:
+                        output += ' {:6.0f} reduction[s] {:3} cores {:4.0f} average-cores'.format(reduction_duration.value, cores, ceil(reductions_per_run*(reduction_duration/run_duration)*cores))
+                        output += ' {:4.0f} GByte/core'.format(ceil(memory_requirement(phase, reduced_rate*run_duration, cores).value/2**30/cores))
+                    except:
+                        output += ' {:6.0f} reduction[s] {:3} cores {:4} average-cores'.format(reduction_duration.value, cores, ' inf')
                     print(output)
 
