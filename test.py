@@ -44,6 +44,19 @@ configs['ESTIA'] = {
     'count':[1e9, 1e9, 1e7, 1e7, 1e9],
     'use':[0.01, 0.001, 0.05, 0.5, 0.5]}
 
+configs['CSPEC'] = {
+    'name':['normal', 'RRM'],
+    'rate':[1e6, 1e7],
+    'count':[1e9, 1e9], # 10 min to 1 h for a single rotation, is this a good estimate?
+    'use':[0.2, 0.8]} # TODO get numbers from Pascale
+
+# TODO event rates
+configs['MAGIC'] = {
+    'name':['normal', 'high-flux'],
+    'rate':[1e6, 1e7], # "typical sample 1e7" (at high flux)
+    'count':[5e5, 5e5], # for each rotation, will have >1000, interpreting each rotation as individual run does not play well with current performance model?
+    'use':[0.2, 0.8]}
+
 
 loki = Beamline('LoKI')
 loki.add_phase(750000)
@@ -57,7 +70,23 @@ estia.add_phase(250000)
 estia.add_phase(500000)
 for name, use, rate, count in zip(configs['ESTIA']['name'], configs['ESTIA']['use'], configs['ESTIA']['rate'], configs['ESTIA']['count']):
     estia.add_config(name, use, rate/u.second, count)
-estia.run([0.2, 0.5, 1.0, 2.0, 5.0], 2)
+estia.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
+
+cspec = Beamline('CSPEC')
+# TODO How to take into account RRM factor 10 in number of histograms?
+cspec.add_phase(400000) # "approx. 1/3 to 2/3 coverage"
+cspec.add_phase(750000)
+for name, use, rate, count in zip(configs['CSPEC']['name'], configs['CSPEC']['use'], configs['CSPEC']['rate'], configs['CSPEC']['count']):
+    cspec.add_config(name, use, rate/u.second, count)
+cspec.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
+
+# TODO include pixel factor for polariations?
+magic = Beamline('MAGIC')
+magic.add_phase(1440000)
+magic.add_phase(2880000)
+for name, use, rate, count in zip(configs['MAGIC']['name'], configs['MAGIC']['use'], configs['MAGIC']['rate'], configs['MAGIC']['count']):
+    magic.add_config(name, use, rate/u.second, count)
+magic.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
 
 #ess.add_instrument('{}-phase1-{}'.format(instrument_name, config.name), InstrumentParams(num_pixel=750000, event_rate=config.rate, run_duration=required_events/config.rate, max_rate_compensation=1))
 

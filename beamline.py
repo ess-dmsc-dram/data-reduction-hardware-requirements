@@ -44,13 +44,14 @@ class Beamline:
                     resources = i.required_resources(reduction_duration)
                     # TODO take into account that not 100% of time is measurement time?
                     cores = resources['cores']
+                    actual_duration = resources['actual_duration']
                     try:
                         # Average cores takes into account reducing data several times.
                         reductions_per_run = 2
-                        average_cores = ceil(use_fraction*reductions_per_run*(reduction_duration/run_duration)*cores)
-                        output += ' {:6.0f} reduction[s] {:3} cores {:4.0f} average-cores'.format(reduction_duration.value, cores, average_cores)
+                        average_cores = ceil(use_fraction*reductions_per_run*(actual_duration/run_duration)*cores)
+                        output += ' {:6.0f} reduction[s] {:3} cores {:4.0f} average-cores'.format(actual_duration.value, cores, average_cores)
                         output += ' {:4.0f} GByte/core'.format(ceil(memory_requirement(phase, reduced_rate*run_duration, cores).value/2**30/cores))
                     except:
-                        output += ' {:6.0f} reduction[s] {:3} cores {:4} average-cores'.format(reduction_duration.value, cores, ' inf')
+                        output += ' {:6} reduction[s] {:3} cores {:4} average-cores'.format('   inf', 'inf', ' inf')
                     print(output)
 

@@ -23,11 +23,11 @@ class Instrument:
     def required_resources(self, reduction_duration):
         model = PerformanceModel()
         num_event = self.params.run_duration*self.params.event_rate
-        for cores in range(1, 999):
+        for cores in [ 2**i for i in range(12) ]:
             actual_duration = model.seconds(cores, self.params.num_pixel, self.params.run_duration*self.params.event_rate)
             if actual_duration < reduction_duration:
-                return {'cores':cores, 'cpu_time':cores*actual_duration, 'size_on_disk':num_event*12*u.byte, 'memory_per_core':memory_requirement(self.params.num_pixel, num_event)/cores}
-        return {'cores':'inf', 'cpu_time':'inf', 'size_on_disk':num_event*12*u.byte, 'memory_per_core':0}
+                return {'actual_duration':actual_duration, 'cores':cores, 'cpu_time':cores*actual_duration, 'size_on_disk':num_event*12*u.byte, 'memory_per_core':memory_requirement(self.params.num_pixel, num_event)/cores}
+        return {'actual_duration':0*u.second, 'cores':'inf', 'cpu_time':'inf', 'size_on_disk':num_event*12*u.byte, 'memory_per_core':0}
 
     # figures of interest:
     # - number of cores for given reduction duration
