@@ -8,8 +8,8 @@ HIST_FILE=$DIR/SANS2D-histogram-mode
 EVENT_FILE=$DIR/SANS2D-event-mode
 
 mkdir -p $DIR
-rm $HIST_FILE
-rm $EVENT_FILE
+rm -f $HIST_FILE
+rm -f $EVENT_FILE
 
 for i in $(seq 1 12)
 do
