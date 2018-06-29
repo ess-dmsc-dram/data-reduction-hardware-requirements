@@ -10,6 +10,16 @@
 
 ## Performance master equation
 
+*Note:* This section is outdated and will be updated with results from tests regarding dependency on bin count.
+This will lead to different estimates depending on the resolution modes of an instrument.
+My intermediate conclusion is that there is no relevant `t_spec` term, just a `t_bin` term.
+It depends on how much of the reduction is done in event mode:
+```
+Bins/s/core: 21019851.236351 (PG3 event-mode reduction)
+Bins/s/core: 7581696.451776 (SANS2D event-mode reduction)
+Bins/s/core: 3692113.200112 (SANS2D histogram-mode reduction)
+```
+
 With a couple of approximations (which are probably minor for this purpose and compared to other sources of uncertainty) we can describe the time required to reduce a set of data with the following formula:
 
 ```

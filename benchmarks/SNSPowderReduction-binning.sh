@@ -6,13 +6,14 @@ set -o pipefail
 MANTID=~/software/mantid-mpi/bin/mantidpython
 SCRIPT="./run_SNSPowderReduction.py"
 RESULTS="results"
+EVENT_SCALE=$1
+SUFFIX=$2
 HIST_FILE=$RESULTS/PG3-histogram-mode
-EVENT_FILE=$RESULTS/PG3-event-mode-scale-$EVENT_SCALE
+EVENT_FILE=$RESULTS/PG3-event-mode-scale-"$EVENT_SCALE"-$SUFFIX
 PWD=$(pwd)
 
 # Create data files with the requested number of events.
 DATA="data"
-EVENT_SCALE=$1
 ./make_SNSPowderReduction_files.sh ~/build/mantid-mpi/ExternalData/Testing/Data/SystemTest/ $DATA $EVENT_SCALE
 RUN_FILE=$DATA/PG3_77777_event.nxs
 
@@ -39,7 +40,7 @@ for i in $(seq 1 12)
 do
   line_event="$i"
   line_histogram="$i"
-  for bin_scale in 0.25 0.5 1 2 4 8 16
+  for bin_scale in 0.001 #0.25 0.5 1 2 4 8 16
   do
     seconds=$(\time -f %e mpirun -n $i $MANTID --classic $SCRIPT $bin_scale $RUN_FILE $CHAR_FILE 2>&1 | tail -n 1)
     if [ $? -ne 0 ]

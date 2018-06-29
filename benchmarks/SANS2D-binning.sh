@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Important: Need to enable pipefail to capture return value of Mantid in command with pipe below.
 set -o pipefail
@@ -7,8 +7,9 @@ MANTID=~/software/mantid-mpi/bin/mantidpython
 SCRIPT="./run_SANS2DMinimalBatchReductionSlicedTest_V2.py"
 CONFIG=$(mktemp)
 RESULTS="results"
-HIST_FILE=$RESULTS/SANS2D-histogram-mode
-EVENT_FILE=$RESULTS/SANS2D-event-mode
+SUFFIX=$1
+HIST_FILE=$RESULTS/SANS2D-histogram-mode-$SUFFIX
+EVENT_FILE=$RESULTS/SANS2D-event-mode-$SUFFIX
 
 mkdir -p $RESULTS
 rm -f $HIST_FILE
