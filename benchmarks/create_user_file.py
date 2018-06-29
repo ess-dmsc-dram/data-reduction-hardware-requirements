@@ -64,4 +64,4 @@ DET/CORR FRONT ROT 0.0
 !! 01/10/13 MASKSANS2d_133F M3 by M1 trans Hellsing, Rennie, Jackson, L1=L2=12m A1=20 and A2=8mm
 L/EVENTSTIME 7000.0,{:f},60000.0"""
 
-print(template.format(0.125/factor, 0.01/factor, -0.08/factor, 500.0/factor))
+print(template.format(0.125/factor, 0.001/factor, -0.08/factor, 500.0/factor))
