@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#=========================================================
+# Use in the following way:
+# ./SNSPowderReduction-binning.sh | tee bench_log.txt
+#=========================================================
+
 # Important: Need to enable pipefail to capture return value of Mantid in command with pipe below.
 set -o pipefail
 
@@ -14,14 +19,14 @@ EVENT_FILE=$RESULTS/PG3-event-mode-scale-"$EVENT_SCALE"-$SUFFIX
 PWD=$(pwd)
 
 # Create data files with the requested number of events.
-# DATA="data"
+DATA="data"
 DATAPATH="/media/nvaytet/30c9d25c-0aba-427f-b8ea-3079e881dfce/benchmarks/SNSPowderReduction_data"
 
 
 
 for j in $(seq 1 20); do
 
-  DATA="${DATAPATH}/data_fact$(printf "%03d" $j)"
+  ln -s "${DATAPATH}/data_fact$(printf "%03d" $j)" ${DATA}
 
   EVENT_SCALE=$j;
 
@@ -76,5 +81,8 @@ for j in $(seq 1 20); do
 #     echo $line_event | tee -a $EVENT_FILE
   done
   mv $CONFIG.backup $CONFIG
+  
+  # Remove symbolic link to data directory
+  rm ${DATA}
 
 done
