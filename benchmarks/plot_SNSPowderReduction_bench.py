@@ -46,11 +46,11 @@ data = np.loadtxt("SNSPowderReduction_bench.txt")
 #print np.shape(data)
 
 fig = plt.figure()
-ratio = 1.5
-sizex = 7.0
+ratio = 0.4
+sizex = 14.0
 fig.set_size_inches(sizex,ratio*sizex)
-ax1 = fig.add_subplot(211)
-ax2 = fig.add_subplot(212)
+ax1 = fig.add_subplot(121)
+ax2 = fig.add_subplot(122)
 
 n = np.shape(data)[1] / 2
 
@@ -79,4 +79,4 @@ ax2.legend()
 ax1.grid(True,color='gray',linestyle='dotted')
 ax2.grid(True,color='gray',linestyle='dotted')
 
-fig.savefig("SNSPowderReduction_bench.pdf",bbox_inches="tight")
+fig.savefig("SNSPowderReduction_bench.png",bbox_inches="tight")
