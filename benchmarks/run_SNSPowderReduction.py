@@ -21,6 +21,6 @@ SNSPowderReduction(Filename=run_file,
                    CalibrationFile=cal_file,
                    CharacterizationRunsFile=char_file,
                    LowResRef=15000, RemovePromptPulseWidth=50,
-                   Binning=-0.0004/factor, BinInDspace=True, FilterBadPulses=95,
+                   Binning=-0.0000004/factor, BinInDspace=True, FilterBadPulses=95,
                    SaveAs="gsas and fullprof and pdfgetn", OutputDirectory=cwd + '/data',
                    FinalDataUnits="dSpacing")
