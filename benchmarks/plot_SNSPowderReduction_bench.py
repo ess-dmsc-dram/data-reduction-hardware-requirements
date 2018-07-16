@@ -117,6 +117,7 @@ ax2.set_ylabel("Speedup")
 
 
 sc = ax3.scatter(Nevents,np.log10(data[:,3]),c=data[:,1],cmap='jet')
+#sc = ax3.scatter(Nevents,data[:,3],c=data[:,1],cmap='jet')
 ax3.set_xlabel("Number of events")
 ax3.set_ylabel("Log(runtime) (s)")
 cb3 = plt.colorbar(sc,ax=ax3)
@@ -138,5 +139,14 @@ ax2.grid(True,color='gray',linestyle='dotted')
 ax3.grid(True,color='gray',linestyle='dotted')
 ax4.grid(True,color='gray',linestyle='dotted')
 
+lsize=17
+xlab1 = 0.05
+xlab2 = 0.95
+ylab = 0.93
+
+ax1.text(xlab2,ylab,'a',ha='center',va='center',fontsize=lsize,transform = ax1.transAxes)
+ax2.text(xlab1,ylab,'b',ha='center',va='center',fontsize=lsize,transform = ax2.transAxes)
+ax3.text(xlab1,ylab,'c',ha='center',va='center',fontsize=lsize,transform = ax3.transAxes)
+ax4.text(xlab2,ylab,'d',ha='center',va='center',fontsize=lsize,transform = ax4.transAxes)
 
 fig.savefig("SNSPowderReduction_bench.png",bbox_inches="tight")
