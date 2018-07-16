@@ -67,14 +67,14 @@ ax2.plot([0,11],[0,11],color='k',zorder=-5,lw=1,label="ideal")
 ax1.set_xlim([0,11])
 ax1.set_xlabel("Number of CPUs")
 ax1.set_ylabel("Workflow runtime (s)")
-ax1.legend()
+#ax1.legend()
 
 
 ax2.set_xlim([0,11])
-ax2.set_ylim([0,8])
+ax2.set_ylim([0,9])
 ax2.set_xlabel("Number of CPUs")
 ax2.set_ylabel("Speedup")
-ax2.legend()
+#ax2.legend()
 
 ax1.grid(True,color='gray',linestyle='dotted')
 ax2.grid(True,color='gray',linestyle='dotted')
