@@ -46,34 +46,16 @@ data = np.loadtxt("SNSPowderReduction_bench.txt")
 #print np.shape(data)
 
 fig = plt.figure()
-ratio = 0.7
+ratio = 1.0
 sizex = 14.0
 fig.set_size_inches(sizex,ratio*sizex)
-ax1 = fig.add_subplot(221)
-ax2 = fig.add_subplot(222)
-ax3 = fig.add_subplot(223)
-ax4 = fig.add_subplot(224)
+ax1 = fig.add_subplot(321)
+ax2 = fig.add_subplot(322)
+ax3 = fig.add_subplot(323)
+ax4 = fig.add_subplot(324)
+ax5 = fig.add_subplot(325)
+ax6 = fig.add_subplot(326)
 
-
-# Find max factor
-#maxfact = int(np.amax(data[:,2]))
-
-
-#n = np.shape(data)[1] / 2
-
-#for i in range(maxfact):
-    
-    #selection = np.where(data[:,2] == float(i+1))
-    
-    #ax1.plot(data[:,1][selection],data[:,3][selection],label="fact %i"%(i+1))
-    
-    
-    ##ax1.plot(data[:,2*i],data[:,2*i+1]/1000.0,label="fact %i"%(i+1))
-    ###ax1.plot([0,11],[data[-1,2*i+1]/1000.0,data[-1,2*i+1]/1000.0],color='lightgrey',zorder=-5,lw=1)
-    
-    #time0 = data[:,3][selection][0]
-    #print time0
-    #ax2.plot(data[:,1][selection],time0/data[:,3][selection],label="fact %i"%(i+1))
 
 
 
@@ -132,6 +114,13 @@ ax4.set_ylabel(r"Time per event ($\mu$s)")
 cb4 = plt.colorbar(sa,ax=ax4)
 cb4.ax.set_ylabel("Number of Events")
 
+s5 = ax5.scatter(data[:,1],1.0e6*data[:,6]/data[:,4])
+ax5.scatter(data[:,1],1.0e6*data[:,7]/data[:,5])
+#sb = ax4.scatter(data[:,1],1.0e6*data[:,3]/data[:,5],color='b')
+ax5.set_xlabel("Number of CPUs")
+ax5.set_ylabel(r"Time of filtering operation per event ($\mu$s)")
+#cb5 = plt.colorbar(s5,ax=ax5)
+#cb5.ax.set_ylabel("Number of CPUs")
 
 
 ax1.grid(True,color='gray',linestyle='dotted')
