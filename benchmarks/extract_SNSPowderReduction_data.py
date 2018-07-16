@@ -41,6 +41,9 @@ for line in fin:
             proton_count = 0
             get_Nevents = False
 
+    if line.count("NBINS_NORMAL") > 0:
+        NBins = float(line.split(' ')[-1].rstrip())
+
     # If 'NCPU' is found, then we have number of cpus and runtime
     if line.count("NCPU") > 0:
         data.append([0]*ncols)
@@ -52,6 +55,7 @@ for line in fin:
         
         data[run_count][4] = nevents[0]
         data[run_count][5] = nevents[1]
+        data[run_count][6] = NBins
         run_count += 1
         
 # Write data to file

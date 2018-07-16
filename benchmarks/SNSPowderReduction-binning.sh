@@ -6,7 +6,7 @@
 #=========================================================
 
 # Important: Need to enable pipefail to capture return value of Mantid in command with pipe below.
-set -o pipefail
+# set -o pipefail
 
 # MANTID=~/software/mantid-mpi/bin/mantidpython
 MANTID=/home/nvaytet/work/mantid/branches/current-build/bin/mantidpython
@@ -22,13 +22,26 @@ PWD=$(pwd)
 DATA="data"
 DATAPATH="/media/nvaytet/30c9d25c-0aba-427f-b8ea-3079e881dfce/benchmarks/SNSPowderReduction_data"
 
+# Append our data path to the Mantid search path.
+CONFIG=~/.mantid/Mantid.user.properties
+cp $CONFIG $CONFIG.backup
+# trap "mv $CONFIG.backup $CONFIG" INT
+DATA_SEARCH_DIRS=$(cat $CONFIG | grep ^datasearch.directories)";$PWD/$DATA"
+cat $CONFIG | grep -v ^datasearch.directories > $CONFIG.new
+mv $CONFIG.new $CONFIG
+echo $DATA_SEARCH_DIRS >> $CONFIG
 
+# exit
 
 for j in $(seq 1 20); do
 
+  # Remove symbolic link
+  rm ${DATA}
   ln -s "${DATAPATH}/data_fact$(printf "%03d" $j)" ${DATA}
 
   EVENT_SCALE=$j;
+  
+#   exit
 
   echo "Running benchmark with factor: $j";
 
@@ -42,15 +55,17 @@ for j in $(seq 1 20); do
   #L frequency(Hz) center_wavelength(angstrom) bank_num vanadium_run empty_run vanadium_back d_min(angstrom) d_max(angstrom)\n
   60 0.533  1 88888 0 99999 0.10  2.20 00000.00 16666.67" > $CHAR_FILE
 
-  # Append our data path to the Mantid search path.
-  CONFIG=~/.mantid/Mantid.user.properties
-  cp $CONFIG $CONFIG.backup
-  trap "mv $CONFIG.backup $CONFIG" INT
-  DATA_SEARCH_DIRS=$(cat $CONFIG | grep ^datasearch.directories)";$PWD/$DATA"
-  cat $CONFIG | grep -v ^datasearch.directories > $CONFIG.new
-  mv $CONFIG.new $CONFIG
-  echo $DATA_SEARCH_DIRS >> $CONFIG
+#   # Append our data path to the Mantid search path.
+#   CONFIG=~/.mantid/Mantid.user.properties
+#   cp $CONFIG $CONFIG.backup
+#   trap "mv $CONFIG.backup $CONFIG" INT
+#   DATA_SEARCH_DIRS=$(cat $CONFIG | grep ^datasearch.directories)";$PWD/$DATA"
+#   cat $CONFIG | grep -v ^datasearch.directories > $CONFIG.new
+#   mv $CONFIG.new $CONFIG
+#   echo $DATA_SEARCH_DIRS >> $CONFIG
 
+#   exit
+  
   mkdir -p $RESULTS
   rm -f $HIST_FILE
   rm -f $EVENT_FILE
@@ -73,16 +88,20 @@ for j in $(seq 1 20); do
       if [ $? -ne 0 ]
       then
         echo "Mantid exited with a non-zero status, aborting."
-        mv $CONFIG.backup $CONFIG
+#         mv $CONFIG.backup $CONFIG
         exit 1
       fi
 #       line_event=$line_event" "$seconds
     done
 #     echo $line_event | tee -a $EVENT_FILE
+#     read -n1 -r -p "Press space to continue..." key
   done
-  mv $CONFIG.backup $CONFIG
+#   mv $CONFIG.backup $CONFIG
   
   # Remove symbolic link to data directory
-  rm ${DATA}
+#   rm ${DATA}
+#     rm ${DATA}/*.dat ${DATA}/*.gsa ${DATA}/*.py ${DATA}/*.txt
 
 done
+
+mv $CONFIG.backup $CONFIG
