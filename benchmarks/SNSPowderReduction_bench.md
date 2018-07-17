@@ -6,7 +6,7 @@ The `grow.py` script is used to artificially increase the number of events in a 
 Growing the data is actually quite time-consuming, so the `loop_make_SNSPowderReduction_files.sh` 
 file was created to run only the data generation. This is done once and for all and does not need 
 to be carried out every time the benchmark is run, the data in simply stored on disk (~85Gb). Note 
-that the disk is a classical 
+that the disk is a classical HDD (Seagate Desktop HDD ST2000DM001 - 2 TB - SATA 6Gb/s - 7200 rpm).
 
 The `SNSPowderReduction-binning.sh` script contains a loop over `grow` factor and number of cpus.
 Figure 1 shows the scaling performance of the workflow. Machine used: HP Z820 workstation (12 
