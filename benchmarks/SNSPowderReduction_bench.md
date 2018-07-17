@@ -73,10 +73,10 @@ panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/d
 
 
 
-**TODO:** change the number of bins, get the workflow to use `FilterEvents`.  
+**TODO:** ~~change the number of bins~~, get the workflow to use `FilterEvents`.  
 
 
-**Notes on using more than 10 CPUs**:
+### Notes on using more than 10 CPUs
 
 For a reason I have not been able to determine, the workflow won't run on 11 or 12 (or even 16) 
 CPUs. It just halts at `AlignAndFocusPowder-[Warning] null output` after starting 

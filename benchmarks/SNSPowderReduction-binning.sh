@@ -33,7 +33,7 @@ echo $DATA_SEARCH_DIRS >> $CONFIG
 
 # exit
 
-for j in $(seq 5 5); do
+for j in $(seq 1 20); do
 
   # Remove symbolic link
   rm ${DATA}
@@ -75,7 +75,7 @@ for j in $(seq 5 5); do
 
     line_event="$i"
     line_histogram="$i"
-    for bin_scale in 0.001 0.002 0.004 0.008 0.016 0.032 #0.25 0.5 1 2 4 8 16
+    for bin_scale in 0.001 # 0.002 0.004 0.008 0.016 0.032 #0.25 0.5 1 2 4 8 16
     do
   #     echo "$i $MANTID $SCRIPT $bin_scale $RUN_FILE $CHAR_FILE";
       STARTTIME=$(python -c 'import time; print int(time.time()*1000)');
