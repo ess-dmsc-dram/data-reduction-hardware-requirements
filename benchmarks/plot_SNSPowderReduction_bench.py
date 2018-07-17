@@ -127,6 +127,8 @@ ax1.grid(True,color='gray',linestyle='dotted')
 ax2.grid(True,color='gray',linestyle='dotted')
 ax3.grid(True,color='gray',linestyle='dotted')
 ax4.grid(True,color='gray',linestyle='dotted')
+ax5.grid(True,color='gray',linestyle='dotted')
+ax6.grid(True,color='gray',linestyle='dotted')
 
 lsize=17
 xlab1 = 0.05
@@ -137,5 +139,7 @@ ax1.text(xlab2,ylab,'a',ha='center',va='center',fontsize=lsize,transform = ax1.t
 ax2.text(xlab1,ylab,'b',ha='center',va='center',fontsize=lsize,transform = ax2.transAxes)
 ax3.text(xlab1,ylab,'c',ha='center',va='center',fontsize=lsize,transform = ax3.transAxes)
 ax4.text(xlab2,ylab,'d',ha='center',va='center',fontsize=lsize,transform = ax4.transAxes)
+ax5.text(xlab2,ylab,'e',ha='center',va='center',fontsize=lsize,transform = ax5.transAxes)
+ax6.text(xlab2,ylab,'f',ha='center',va='center',fontsize=lsize,transform = ax6.transAxes)
 
 fig.savefig("SNSPowderReduction_bench.png",bbox_inches="tight")

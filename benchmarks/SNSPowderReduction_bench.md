@@ -18,6 +18,9 @@ Panel (b) shows that a larger number of events leads to a better speedup, which 
 size of the parallel portion of the computational work increases. The times per event in panel (d) 
 go below 0.1 &mu;s for NCPU > ~4 as long as the number of events is high enough.
 
+The timings from panel (e) are taken from Mantid directly (i.e. what is prints out in the log) for
+the `FilterBadPulses` algorithm. This was then simply divided by the number of events.
+
 The number of bins here was 7728.
 
 The table containing the data is `SNSPowderReduction_bench.txt`:
@@ -63,4 +66,4 @@ The columns represent (in order):
 For a reason I have not been able to determine, the workflow won't run on 11 or 12 (or even 16) 
 CPUs. It just halts at `AlignAndFocusPowder-[Warning] null output` after starting 
 `DiffractionFocussing`. All the CPUs are still working, at 100% but the workflow never progresses.
-
+This behaviour is independent of the size of the data to process (i.e. the number of events).
