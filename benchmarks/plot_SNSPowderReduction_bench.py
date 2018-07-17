@@ -114,13 +114,13 @@ ax4.set_ylabel(r"Time per event ($\mu$s)")
 cb4 = plt.colorbar(sa,ax=ax4)
 cb4.ax.set_ylabel("Number of Events")
 
-s5 = ax5.scatter(data[:,1],1.0e6*data[:,6]/data[:,4])
-ax5.scatter(data[:,1],1.0e6*data[:,7]/data[:,5])
+s5 = ax5.scatter(data[:,1],1.0e6*data[:,6]/data[:,4],c=data[:,4],vmin=0.1e9,vmax=1.4e9,cmap='jet')
+ax5.scatter(data[:,1],1.0e6*data[:,7]/data[:,5],c=data[:,5],vmin=0.1e9,vmax=1.4e9,cmap='jet')
 #sb = ax4.scatter(data[:,1],1.0e6*data[:,3]/data[:,5],color='b')
 ax5.set_xlabel("Number of CPUs")
 ax5.set_ylabel(r"Time of filtering operation per event ($\mu$s)")
-#cb5 = plt.colorbar(s5,ax=ax5)
-#cb5.ax.set_ylabel("Number of CPUs")
+cb5 = plt.colorbar(s5,ax=ax5)
+cb5.ax.set_ylabel("Number of events")
 
 
 ax1.grid(True,color='gray',linestyle='dotted')
@@ -143,3 +143,98 @@ ax5.text(xlab2,ylab,'e',ha='center',va='center',fontsize=lsize,transform = ax5.t
 ax6.text(xlab2,ylab,'f',ha='center',va='center',fontsize=lsize,transform = ax6.transAxes)
 
 fig.savefig("SNSPowderReduction_bench.png",bbox_inches="tight")
+
+
+
+
+
+
+
+
+
+
+# Plot of function timings
+
+fig.clear()
+
+ratio = 2.0
+sizex = 6.0
+fig.set_size_inches(sizex,ratio*sizex)
+ax1 = fig.add_axes([0.0,0.0,1.0,1.0])
+
+ax2 = fig.add_axes([1.05,0.0,1.0,1.0])
+
+tfile = "mantid_function_timings.txt"
+
+f = open(tfile, 'r')
+header = f.readline().split()
+header.pop(0)
+f.close()
+
+#print header
+
+itot = header.index("Total")
+
+
+
+time_data = np.loadtxt(tfile)
+
+[nx,ny] = np.shape(time_data)
+
+#print nx,ny
+
+list_x = []
+list_y = []
+list_z = []
+
+xmin1 = -0.01
+xmax1 = 0.16
+xmin2 = -5.5
+xmax2 = -0.6
+
+cc = 0
+for j in range(ny):
+    if (j != itot) and (j != 0) :
+        cc += 1
+        ax1.text(-0.015,cc,header[j],ha='right',va='center')
+    for i in range(nx):
+        if (j != itot) and (j != 0) :
+            list_x.append(time_data[i,j]/time_data[i,itot])
+            list_y.append(cc)
+            list_z.append(i+1)
+            ax1.plot([xmin1,xmax1],[cc,cc],color='lightgray',ls='dotted',zorder=-10)
+            ax2.plot([xmin2,xmax2],[cc,cc],color='lightgray',ls='dotted',zorder=-10)
+
+s9 = ax1.scatter(list_x,list_y,c=list_z,cmap='jet')
+ax1.set_xlabel("Percentage of total time")
+ax1.set_yticklabels([])
+cbaxes = fig.add_axes([0.0, 1.02, 1.0, 0.018])
+cb9 = plt.colorbar(s9,ax=ax1,orientation='horizontal',cax=cbaxes)
+cb9.ax.set_xlabel("Number of CPUs")
+cb9.ax.xaxis.set_ticks_position('top')
+ax1.grid(True,color='gray',linestyle='dotted')
+ax1.get_yaxis().set_visible(False)
+ax1.set_ylim([0,48])
+ax1.set_xlim([xmin1,xmax1])
+
+
+
+s8 = ax2.scatter(np.log10(list_x),list_y,c=list_z,cmap='jet')
+ax2.set_xlabel("log(Percentage of total time)")
+ax2.set_yticklabels([])
+cbaxes2 = fig.add_axes([1.05, 1.02, 1.0, 0.018])
+cb8 = plt.colorbar(s8,ax=ax2,orientation='horizontal',cax=cbaxes2)
+cb8.ax.set_xlabel("Number of CPUs")
+cb8.ax.xaxis.set_ticks_position('top')
+ax2.grid(True,color='gray',linestyle='dotted')
+ax2.get_yaxis().set_visible(False)
+ax2.set_ylim([0,48])
+ax2.set_xlim([xmin2,xmax2])
+
+
+
+fig.savefig("timings.pdf",bbox_inches="tight")
+
+
+
+

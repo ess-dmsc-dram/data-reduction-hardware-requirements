@@ -1,4 +1,4 @@
-## SNSPowderReduction benchmark:
+## SNSPowderReduction benchmark
 
 The `SNSPowderReduction` workflow was run using 1-10 cpus, and `grow.py` factors from 1-20.
 
@@ -14,7 +14,7 @@ cores: 2x Intel(R) Xeon(R) CPU E5-2630 v2 @ 2.60GHz)
 
 ![Figure 1](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/SNSPowderReduction_bench.png)
 
-Panel (b) shows that a larger number of events leads to a better speedup, which is expected as the 
+**Figure 1:** Panel (b) shows that a larger number of events leads to a better speedup, which is expected as the 
 size of the parallel portion of the computational work increases. The times per event in panel (d) 
 go below 0.1 &mu;s for NCPU > ~4 as long as the number of events is high enough.
 
@@ -55,6 +55,16 @@ The columns represent (in order):
 8: Time for filtering bad pulses from 99999 file
 
 
+### Profiling the workflow
+
+We use the timings given my Mantid to get a rough profiling of the workflow. The percentage of time
+spent in each part of the workflow is shown in figure 2
+
+![Figure 2](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/timings.png)
+
+**Figure 2:** The left panel shows a linear percentage scale, while it is logarithmic in the right
+panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/timings.pdf) version of the figure.
+
 
 
 
@@ -67,3 +77,18 @@ For a reason I have not been able to determine, the workflow won't run on 11 or 
 CPUs. It just halts at `AlignAndFocusPowder-[Warning] null output` after starting 
 `DiffractionFocussing`. All the CPUs are still working, at 100% but the workflow never progresses.
 This behaviour is independent of the size of the data to process (i.e. the number of events).
+
+I also don't fully understand why some of the time during the workflow execution individual CPU 
+usages go to ~200% when I set `MultiThreaded.MaxCores=1` in `Mantid.user.properties`.
+```
+top - 11:00:16 up 6 days, 19:17,  1 user,  load average: 1.03, 0.69, 1.56
+Tasks: 421 total,   1 running, 276 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  5.8 us,  0.7 sy,  0.0 ni, 93.5 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem : 65894044 total, 27160064 free,  7158324 used, 31575656 buff/cache
+KiB Swap:  2097148 total,  1720176 free,   376972 used. 61295564 avail Mem 
+
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND                                                                                  
+25593 nvaytet   20   0 4180404 2.952g 109100 S 147.0  4.7   0:35.13 python                                                                                   
+ 1216 root      20   0 1119040 234272 202652 S   1.7  0.4 181:16.52 Xorg                                                                                     
+  311 nvaytet   20   0 1314136  87524  15820 S   1.3  0.1  35:24.84 mate-terminal                                                                            
+```
