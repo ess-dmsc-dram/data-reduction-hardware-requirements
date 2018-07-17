@@ -21,7 +21,7 @@ go below 0.1 &mu;s for NCPU > ~4 as long as the number of events is high enough.
 The timings from panel (e) are taken from Mantid directly (i.e. what is prints out in the log) for
 the `FilterBadPulses` algorithm. This was then simply divided by the number of events.
 
-The number of bins here was 7728.
+The number of bins for panels (a)-(e) was 7728.
 
 Panel (f) shows the dependence of the workflow runtime on the number of bins, from 7728 to 247284.
 
@@ -45,16 +45,16 @@ The table containing the data (for just 7728 bins) is `SNSPowderReduction_bench.
 200.000  10.000  20.000  45.403  358539600.000  1316737300.000  0.570  2.770  0.100 
 ```
 
-The columns represent (in order):
-0: Run number
-1: Number of CPUs
-2: `grow` factor
-3: Workflow runtime
-4: Number of events in 77777 file
-5: Number of events in 88888 (Vanadium) file
-6: Time for filtering bad pulses from 77777 file
-7: Time for filtering bad pulses from 88888 file
-8: Time for filtering bad pulses from 99999 file
+The columns represent (in order):  
+0: Run number  
+1: Number of CPUs  
+2: `grow` factor  
+3: Workflow runtime  
+4: Number of events in 77777 file  
+5: Number of events in 88888 (Vanadium) file  
+6: Time for filtering bad pulses from 77777 file  
+7: Time for filtering bad pulses from 88888 file  
+8: Time for filtering bad pulses from 99999 file  
 
 The table containing the variable number of bins data is `SNSPowderReduction_bins_bench.txt`.
 
