@@ -215,18 +215,37 @@ xmax1 = 0.16
 xmin2 = -5.5
 xmax2 = -0.6
 
-cc = 0
+names = []
+
+# Perform sorting according to maximum time
+max_times = []
 for j in range(ny):
-    if (j != itot) and (j != 0) :
+
+      max_times.append(np.amax(time_data[:,j]/time_data[:,itot]))
+      #print header[j]
+      names.append(header[j])
+#print max_times,len(max_times),ny
+sort = np.argsort(max_times)
+
+#print sort
+#print names
+
+
+cc = 0
+for j in sort:
+    print j,names[j]
+    if (names[j] != "Total") and (names[j] != "NCPU"):
         cc += 1
-        ax1.text(-0.015,cc,header[j],ha='right',va='center')
+        ax1.text(-0.015,cc,names[j],ha='right',va='center')
     for i in range(nx):
-        if (j != itot) and (j != 0) :
+        if (names[j] != "Total") and (names[j] != "NCPU"):
             list_x.append(time_data[i,j]/time_data[i,itot])
             list_y.append(cc)
             list_z.append(i+1)
             ax1.plot([xmin1,xmax1],[cc,cc],color='lightgray',ls='dotted',zorder=-10)
             ax2.plot([xmin2,xmax2],[cc,cc],color='lightgray',ls='dotted',zorder=-10)
+
+
 
 s9 = ax1.scatter(list_x,list_y,c=list_z,cmap='jet')
 ax1.set_xlabel("Percentage of total time")
