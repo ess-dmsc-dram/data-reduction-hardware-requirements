@@ -43,6 +43,8 @@ import numpy as np
 # Now load data and plot
 
 data = np.loadtxt("SNSPowderReduction_bench.txt")
+binData = np.loadtxt("SNSPowderReduction_bins_bench.txt")
+
 #print np.shape(data)
 
 fig = plt.figure()
@@ -123,6 +125,27 @@ cb5 = plt.colorbar(s5,ax=ax5)
 cb5.ax.set_ylabel("Number of events")
 
 
+
+
+s6 = ax6.scatter(np.log10(binData[:,3]),np.log10(binData[:,2]),c=binData[:,1],cmap='jet')
+#s1 = ax1.scatter(data[:,1],np.log10(data[:,3]),c=Nevents,cmap='jet')
+#ax6.set_xlim([0,11])
+#ax6.set_xscale("log", nonposx='clip')
+#ax6.set_yscale("log", nonposy='clip')
+ax6.set_xlabel("Log(Number of bins)")
+ax6.set_ylabel("Log(Workflow runtime) (s)")
+#ax1.set_ylabel("Log(runtime) (s)")
+cb6 = plt.colorbar(s6,ax=ax6)
+cb6.ax.set_ylabel("Number of CPUs")
+
+
+
+
+
+
+
+
+
 ax1.grid(True,color='gray',linestyle='dotted')
 ax2.grid(True,color='gray',linestyle='dotted')
 ax3.grid(True,color='gray',linestyle='dotted')
@@ -140,7 +163,7 @@ ax2.text(xlab1,ylab,'b',ha='center',va='center',fontsize=lsize,transform = ax2.t
 ax3.text(xlab1,ylab,'c',ha='center',va='center',fontsize=lsize,transform = ax3.transAxes)
 ax4.text(xlab2,ylab,'d',ha='center',va='center',fontsize=lsize,transform = ax4.transAxes)
 ax5.text(xlab2,ylab,'e',ha='center',va='center',fontsize=lsize,transform = ax5.transAxes)
-ax6.text(xlab2,ylab,'f',ha='center',va='center',fontsize=lsize,transform = ax6.transAxes)
+ax6.text(xlab1,ylab,'f',ha='center',va='center',fontsize=lsize,transform = ax6.transAxes)
 
 fig.savefig("SNSPowderReduction_bench.png",bbox_inches="tight")
 

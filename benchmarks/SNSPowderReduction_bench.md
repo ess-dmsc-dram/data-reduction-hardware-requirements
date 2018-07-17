@@ -23,7 +23,9 @@ the `FilterBadPulses` algorithm. This was then simply divided by the number of e
 
 The number of bins here was 7728.
 
-The table containing the data is `SNSPowderReduction_bench.txt`:
+Panel (f) shows the dependence of the workflow runtime on the number of bins, from 7728 to 247284.
+
+The table containing the data (for just 7728 bins) is `SNSPowderReduction_bench.txt`:
 
 ```
 # Run no. NCPU factor Runtime Nevents1 Nevents2 t_filter_1 t_filter_2 t_filter_3
@@ -54,6 +56,9 @@ The columns represent (in order):
 7: Time for filtering bad pulses from 88888 file
 8: Time for filtering bad pulses from 99999 file
 
+The table containing the variable number of bins data is `SNSPowderReduction_bins_bench.txt`.
+
+
 
 ### Profiling the workflow
 
@@ -68,7 +73,7 @@ panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/d
 
 
 
-**TODO:** change the number of bins, get the workflow to use `FilterEvents`.
+**TODO:** change the number of bins, get the workflow to use `FilterEvents`.  
 
 
 **Notes on using more than 10 CPUs**:
