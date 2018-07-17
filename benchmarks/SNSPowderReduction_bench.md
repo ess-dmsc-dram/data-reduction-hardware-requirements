@@ -87,8 +87,8 @@ Tasks: 421 total,   1 running, 276 sleeping,   0 stopped,   0 zombie
 KiB Mem : 65894044 total, 27160064 free,  7158324 used, 31575656 buff/cache
 KiB Swap:  2097148 total,  1720176 free,   376972 used. 61295564 avail Mem 
 
-  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND                                                                                  
-25593 nvaytet   20   0 4180404 2.952g 109100 S 147.0  4.7   0:35.13 python                                                                                   
- 1216 root      20   0 1119040 234272 202652 S   1.7  0.4 181:16.52 Xorg                                                                                     
-  311 nvaytet   20   0 1314136  87524  15820 S   1.3  0.1  35:24.84 mate-terminal                                                                            
+  PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+25593 nvaytet   20   0 4180404 2.952g 109100 S 147.0  4.7   0:35.13 python
+ 1216 root      20   0 1119040 234272 202652 S   1.7  0.4 181:16.52 Xorg
+  311 nvaytet   20   0 1314136  87524  15820 S   1.3  0.1  35:24.84 mate-terminal
 ```
