@@ -61,9 +61,10 @@ The columns represent (in order):
 
 Panel (a) shows the dependence of the workflow runtime on the number of bins, from 7728 to 247284.
 Panel (b) shows the number of bins processes per second per core (using the total workflow
-runtime). **This probably should be improved by using the time spent working with histograms 
-rather than total workflow time.
+runtime). **This probably should be improved by using the time spent working with histograms  rather than total workflow time.**
 
+What is the reason for the poor scaling with number of bins? Panel (b) shows significantly worse 
+results for 10 CPUs compared to 1.
 
 The table containing the variable number of bins data is `SNSPowderReduction_bins_bench.txt`.
 
