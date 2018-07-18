@@ -23,8 +23,6 @@ the `FilterBadPulses` algorithm. This was then simply divided by the number of e
 
 The number of bins for panels (a)-(e) was 7728.
 
-Panel (f) shows the dependence of the workflow runtime on the number of bins, from 7728 to 247284.
-
 The table containing the data (for just 7728 bins) is `SNSPowderReduction_bench.txt`:
 
 ```
@@ -55,6 +53,17 @@ The columns represent (in order):
 6: Time for filtering bad pulses from 77777 file  
 7: Time for filtering bad pulses from 88888 file  
 8: Time for filtering bad pulses from 99999 file  
+
+
+### Varying the number of bins
+
+![Figure 2](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/SNSPowderReduction_bins.png)
+
+Panel (a) shows the dependence of the workflow runtime on the number of bins, from 7728 to 247284.
+Panel (b) shows the number of bins processes per second per core (using the total workflow
+runtime). **This probably should be improved by using the time spent working with histograms 
+rather than total workflow time.
+
 
 The table containing the variable number of bins data is `SNSPowderReduction_bins_bench.txt`.
 

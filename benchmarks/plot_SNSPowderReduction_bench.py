@@ -40,6 +40,8 @@ import numpy as np
 #fin.close()
 #fout.close()
 
+cmap1 = "jet"
+
 # Now load data and plot
 
 data = np.loadtxt("SNSPowderReduction_bench.txt")
@@ -63,8 +65,8 @@ ax6 = fig.add_subplot(326)
 
 Nevents = data[:,4]+data[:,5]
 
-s1 = ax1.scatter(data[:,1],data[:,3],c=Nevents,cmap='jet')
-#s1 = ax1.scatter(data[:,1],np.log10(data[:,3]),c=Nevents,cmap='jet')
+s1 = ax1.scatter(data[:,1],data[:,3],c=Nevents,cmap=cmap1)
+#s1 = ax1.scatter(data[:,1],np.log10(data[:,3]),c=Nevents,cmap=cmap1)
 ax1.set_xlim([0,11])
 ax1.set_xlabel("Number of CPUs")
 ax1.set_ylabel("Workflow runtime (s)")
@@ -84,7 +86,7 @@ for j in range(fact_max):
 #maxfact = int(np.amax(data[:,2]))
 #print time0
 
-s2 = ax2.scatter(data[:,1],time0/data[:,3],c=Nevents,cmap='jet')
+s2 = ax2.scatter(data[:,1],time0/data[:,3],c=Nevents,cmap=cmap1)
 ax2.plot([0,11],[0,11],color='k',zorder=-5,lw=1,label="ideal")
 cb2 = plt.colorbar(s2,ax=ax2)
 cb2.ax.set_ylabel("Number of Events")
@@ -100,8 +102,8 @@ ax2.set_ylabel("Speedup")
 
 
 
-sc = ax3.scatter(Nevents,np.log10(data[:,3]),c=data[:,1],cmap='jet')
-#sc = ax3.scatter(Nevents,data[:,3],c=data[:,1],cmap='jet')
+sc = ax3.scatter(Nevents,np.log10(data[:,3]),c=data[:,1],cmap=cmap1)
+#sc = ax3.scatter(Nevents,data[:,3],c=data[:,1],cmap=cmap1)
 ax3.set_xlabel("Number of events")
 ax3.set_ylabel("Log(runtime) (s)")
 cb3 = plt.colorbar(sc,ax=ax3)
@@ -109,15 +111,15 @@ cb3.ax.set_ylabel("Number of CPUs")
 
 #print data[:,3]/data[:,4]
 
-sa = ax4.scatter(data[:,1],1.0e6*data[:,3]/Nevents,c=Nevents,cmap='jet')
+sa = ax4.scatter(data[:,1],1.0e6*data[:,3]/Nevents,c=Nevents,cmap=cmap1)
 #sb = ax4.scatter(data[:,1],1.0e6*data[:,3]/data[:,5],color='b')
 ax4.set_xlabel("Number of CPUs")
 ax4.set_ylabel(r"Time per event ($\mu$s)")
 cb4 = plt.colorbar(sa,ax=ax4)
 cb4.ax.set_ylabel("Number of Events")
 
-s5 = ax5.scatter(data[:,1],1.0e6*data[:,6]/data[:,4],c=data[:,4],vmin=0.1e9,vmax=1.4e9,cmap='jet')
-ax5.scatter(data[:,1],1.0e6*data[:,7]/data[:,5],c=data[:,5],vmin=0.1e9,vmax=1.4e9,cmap='jet')
+s5 = ax5.scatter(data[:,1],1.0e6*data[:,6]/data[:,4],c=data[:,4],vmin=0.1e9,vmax=1.4e9,cmap=cmap1)
+ax5.scatter(data[:,1],1.0e6*data[:,7]/data[:,5],c=data[:,5],vmin=0.1e9,vmax=1.4e9,cmap=cmap1)
 #sb = ax4.scatter(data[:,1],1.0e6*data[:,3]/data[:,5],color='b')
 ax5.set_xlabel("Number of CPUs")
 ax5.set_ylabel(r"Time of filtering operation per event ($\mu$s)")
@@ -127,19 +129,20 @@ cb5.ax.set_ylabel("Number of events")
 
 
 
-s6 = ax6.scatter(np.log10(binData[:,3]),np.log10(binData[:,2]),c=binData[:,1],cmap='jet')
-#s1 = ax1.scatter(data[:,1],np.log10(data[:,3]),c=Nevents,cmap='jet')
-#ax6.set_xlim([0,11])
-#ax6.set_xscale("log", nonposx='clip')
-#ax6.set_yscale("log", nonposy='clip')
-ax6.set_xlabel("Log(Number of bins)")
-ax6.set_ylabel("Log(Workflow runtime) (s)")
-#ax1.set_ylabel("Log(runtime) (s)")
-cb6 = plt.colorbar(s6,ax=ax6)
-cb6.ax.set_ylabel("Number of CPUs")
+#s6 = ax6.scatter(np.log10(binData[:,3]),np.log10(binData[:,2]),c=binData[:,1],cmap=cmap1)
+##s1 = ax1.scatter(data[:,1],np.log10(data[:,3]),c=Nevents,cmap=cmap1)
+##ax6.set_xlim([0,11])
+##ax6.set_xscale("log", nonposx='clip')
+##ax6.set_yscale("log", nonposy='clip')
+#ax6.set_xlabel("Log(Number of bins)")
+#ax6.set_ylabel("Log(Workflow runtime) (s)")
+##ax1.set_ylabel("Log(runtime) (s)")
+#cb6 = plt.colorbar(s6,ax=ax6)
+#cb6.ax.set_ylabel("Number of CPUs")
 
 
-
+#for i in range(np.shape(binData)[0]):
+    #print((binData[i,3]/binData[i,2])/binData[i,1],"bins/s/core",binData[i,3],binData[i,2])
 
 
 
@@ -151,7 +154,7 @@ ax2.grid(True,color='gray',linestyle='dotted')
 ax3.grid(True,color='gray',linestyle='dotted')
 ax4.grid(True,color='gray',linestyle='dotted')
 ax5.grid(True,color='gray',linestyle='dotted')
-ax6.grid(True,color='gray',linestyle='dotted')
+#ax6.grid(True,color='gray',linestyle='dotted')
 
 lsize=17
 xlab1 = 0.05
@@ -170,9 +173,41 @@ fig.savefig("SNSPowderReduction_bench.png",bbox_inches="tight")
 
 
 
+fig.clear()
+
+ratio = 0.3
+sizex = 14.0
+fig.set_size_inches(sizex,ratio*sizex)
+ax6 = fig.add_subplot(121)
+ax7 = fig.add_subplot(122)
 
 
 
+s6 = ax6.scatter(np.log10(binData[:,3]),np.log10(binData[:,2]),c=binData[:,1],cmap=cmap1)
+#s1 = ax1.scatter(data[:,1],np.log10(data[:,3]),c=Nevents,cmap=cmap1)
+#ax6.set_xlim([0,11])
+#ax6.set_xscale("log", nonposx='clip')
+#ax6.set_yscale("log", nonposy='clip')
+ax6.set_xlabel("Log(Number of bins)")
+ax6.set_ylabel("Log(Workflow runtime) (s)")
+#ax1.set_ylabel("Log(runtime) (s)")
+cb6 = plt.colorbar(s6,ax=ax6)
+cb6.ax.set_ylabel("Number of CPUs")
+
+
+s7 = ax7.scatter(np.log10(binData[:,3]),(binData[:,3]/binData[:,2])/binData[:,1],c=binData[:,1],cmap=cmap1)
+ax7.set_xlabel("Log(Number of bins)")
+ax7.set_ylabel("bins/s/core")
+cb7 = plt.colorbar(s7,ax=ax7)
+cb7.ax.set_ylabel("Number of CPUs")
+
+ax6.grid(True,color='gray',linestyle='dotted')
+ax7.grid(True,color='gray',linestyle='dotted')
+ax6.text(xlab1,ylab,'a',ha='center',va='center',fontsize=lsize,transform = ax6.transAxes)
+ax7.text(xlab1,ylab,'b',ha='center',va='center',fontsize=lsize,transform = ax7.transAxes)
+
+
+fig.savefig("SNSPowderReduction_bins.png",bbox_inches="tight")
 
 
 
@@ -247,7 +282,7 @@ for j in sort:
 
 
 
-s9 = ax1.scatter(list_x,list_y,c=list_z,cmap='jet')
+s9 = ax1.scatter(list_x,list_y,c=list_z,cmap=cmap1)
 ax1.set_xlabel("Percentage of total time")
 ax1.set_yticklabels([])
 cbaxes = fig.add_axes([0.0, 1.02, 1.0, 0.018])
@@ -261,7 +296,7 @@ ax1.set_xlim([xmin1,xmax1])
 
 
 
-s8 = ax2.scatter(np.log10(list_x),list_y,c=list_z,cmap='jet')
+s8 = ax2.scatter(np.log10(list_x),list_y,c=list_z,cmap=cmap1)
 ax2.set_xlabel("log(Percentage of total time)")
 ax2.set_yticklabels([])
 cbaxes2 = fig.add_axes([1.05, 1.02, 1.0, 0.018])
