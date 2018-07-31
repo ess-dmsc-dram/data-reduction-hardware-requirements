@@ -10,26 +10,18 @@
 
 ## Performance master equation
 
-*Note:* This section is outdated and will be updated with results from tests regarding dependency on bin count.
-This will lead to different estimates depending on the resolution modes of an instrument.
-My intermediate conclusion is that there is no relevant `t_spec` term, just a `t_bin` term.
-It depends on how much of the reduction is done in event mode:
-```
-Bins/s/core: 21019851.236351 (PG3 event-mode reduction)
-Bins/s/core: 7581696.451776 (SANS2D event-mode reduction)
-Bins/s/core: 3692113.200112 (SANS2D histogram-mode reduction)
-```
-
 With a couple of approximations (which are probably minor for this purpose and compared to other sources of uncertainty) we can describe the time required to reduce a set of data with the following formula:
 
 ```
-t_reduction = t_0 + (N_spec*t_spec + N_event*t_event)/N_core + N_event/bandwidth_max
+t_reduction = t_0 + (N_bin*t_bin + N_event*t_event)/N_core + N_event/bandwidth_max
 ```
 
 Here:
 
-- `N_spec` is the number of spectra in the workflow.
-  Typically this is the number of pixels of the instrument, but it can be different, e.g., when data from pixels is split up, such as for event filtering or RRM.
+- `N_bin` is the number of bins in the workflow, i.e., the number of spectra `N_spec` multiplied by the number of bins per spectrum.
+  Typically `N_spec` is the number of pixels of the instrument, but it can be different, e.g., when data from pixels is split up, such as for event filtering or RRM.
+  The number of bins per spectrum depends on the bandwidth and resolution of the instrument.
+  As a rule of thumb, for a given energy resultion `delta_E` we require a bin size of `delta_E/10`.
 - `N_event` is the total number of events that are being handled in the reduction workflow.
   This can include events from multiple files, e.g., for a sample run and a background run.
 - `N_core` is the number of cores (MPI ranks) used in the reduction.
@@ -37,14 +29,14 @@ Here:
 - `t_0` is a constant time specific to the reduction workflow.
   It includes anything that does not depend and the number of spectra or number of events.
   Typically this includes small parts of the time spend in every algorithm, time for loading experiment logs from NeXus files, time for loading auxiliary files, and other overheads.
-- `t_spec` is the (computed) time to run the workflow for a single spectrum.
+- `t_bin` is the (computed) time to run the workflow for a single bin.
 - `t_event` is the (computed) time to run the workflow for a single event.
 - `bandwidth_max` is the number of events that can be loaded from the file system per second.
 
 The rationale for this equation is as follows:
 
 - For the vast majority of algorithms used in data reduction, all spectra are treated independently.
-  Thus there is a linear term in `N_spec`, but no higher order terms, and there is perfect scaling with `N_core`.
+  Thus there is a linear term in `N_spec` or `N_bin`, but no higher order terms, and there is perfect scaling with `N_core`.
 - Events in Mantid are stored with their respective spectrum.
   Strictly speaking, we should thus include a term
   ```
@@ -76,14 +68,15 @@ The rationale for this equation is as follows:
   We model this limit in the equation with the term `N_event/bandwidth_max`.
   In case a parallel file system provides an bandwidth that is much higher on average than what was benchmarked for a local SSD, we may need to include a different term that captures limited scaling of the parallel loader.
 - The time for reducing a spectrum will often depend linearly on the bin count.
-  However, for a given reduction workflow the bin count does not vary much, so there is not need to express it explicitly.
+  Many instrument can adjust their resolution, usually by sacrificing brightness.
+  Thus the bin count will be fixed for a given run but can vary between runs within a instrument-specific range.
 
 ## Experiments
 
 Experiments with a series of different workflows (SANS using the SANS2D workflow, powder diffraction using the `SNSPowderReduction` workflow for PG3, direct geometry using the `DgsReduction` workflow for CNCS) show a surprisingly consistent pattern, independent of the technique:
 
 - `t_0` is about 10 seconds.
-- `t_spec` is about 1/1.000 seconds, or slightly smaller.
+- `t_bin` varies from 1/1.000.0000 seconds for histogram-heavy reductions to about 1/10.000.000 seconds for reductions with near-ubiquitous use of event-mode.
 - `t_event` is about 1/1.000.0000 seconds, or slightly smaller.
 - `bandwidth_max` is about 1/50.000.000 seconds for an SSD, tests with a parallel file system are pending.
 
@@ -114,7 +107,7 @@ Here:
 For convenience, we can expand the master equation and obtain:
 
 ```
-N_core_average = N_reduction * (N_core * (t_0 + N_event/bandwidth_max) + N_spec*t_spec + N_event*t_event) / t_run
+N_core_average = N_reduction * (N_core * (t_0 + N_event/bandwidth_max) + N_bin*t_bin + N_event*t_event) / t_run
 ```
 
 It is important to note that `N_core_average` depends on `N_core`, i.e., the more cores we use, the higher our overall hardware requirement.
