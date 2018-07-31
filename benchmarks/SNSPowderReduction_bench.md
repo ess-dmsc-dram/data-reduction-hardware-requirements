@@ -107,3 +107,40 @@ KiB Swap:  2097148 total,  1720176 free,   376972 used. 61295564 avail Mem
  1216 root      20   0 1119040 234272 202652 S   1.7  0.4 181:16.52 Xorg
   311 nvaytet   20   0 1314136  87524  15820 S   1.3  0.1  35:24.84 mate-terminal
 ```
+
+### Other tests
+
+I also tried running two more workflows and ran into issues.
+
+#### SANS2D-binning.sh
+
+A script, that calls `run_SANS2DMinimalBatchReductionSlicedTest_V2.py` runs fine with 1 CPU but then just hangs at
+```
+LoadInstrument-[Notice] LoadInstrument successful, Duration 0.03 seconds
+```
+after also printing out the error
+```
+Traceback (most recent call last):
+  File "./run_SANS2DMinimalBatchReductionSlicedTest_V2.py", line 26, in <module>
+    BatchReduce(BATCHFILE, '.nxs', saveAlgs={}, combineDet='rear')
+  File "/home/nvaytet/work/mantid/MPI/mpi-build/scripts/SANS/sans/command_interface/ISISCommandInterface.py", line 911, in BatchReduce
+    use_reduction_mode_as_suffix=use_reduction_mode_as_suffix)
+  File "/home/nvaytet/work/mantid/MPI/mpi-build/scripts/SANS/sans/command_interface/ISISCommandInterface.py", line 783, in WavRangeReduction
+    state = director.process_commands()
+  File "/home/nvaytet/work/mantid/MPI/mpi-build/scripts/SANS/sans/command_interface/command_interface_state_director.py", line 127, in process_commands
+    data_state = self._get_data_state()
+  File "/home/nvaytet/work/mantid/MPI/mpi-build/scripts/SANS/sans/command_interface/command_interface_state_director.py", line 148, in _get_data_state
+    file_information = file_information_factory.create_sans_file_information(file_name)
+  File "/home/nvaytet/work/mantid/MPI/mpi-build/scripts/SANS/sans/common/file_information.py", line 1043, in create_sans_file_information
+    raise NotImplementedError("The file type you have provided is not implemented yet.")
+```
+
+#### HYSPECReductionTest.sh
+
+Taken from the system tests, I tried to use this workflow as it makes use of FilterEvents, but this failed on more than one CPU, saying that the algorithm does not support distributed workspaces
+
+```
+FilterByLogValue-[Notice] FilterByLogValue started
+GenerateEventsFilter-[Warning] Algorithm does not support execution with input workspaces of the following storage types: 
+GenerateEventsFilter-[Warning] InputWorkspace Parallel::StorageMode::Distributed
+```
