@@ -86,12 +86,20 @@ panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/d
 **TODO:** ~~change the number of bins~~, get the workflow to use `FilterEvents`.  
 
 
-### Notes on using more than 10 CPUs
+### Notes on using more than 10 CPUs [SOLVED]
 
 For a reason I have not been able to determine, the workflow won't run on 11 or 12 (or even 16) 
 CPUs. It just halts at `AlignAndFocusPowder-[Warning] null output` after starting 
 `DiffractionFocussing`. All the CPUs are still working, at 100% but the workflow never progresses.
 This behaviour is independent of the size of the data to process (i.e. the number of events).
+
+**Update:** setting in the Mantid.user.properties file
+```
+logging.channels.fileFilterChannel.level=
+```
+solves this problem (thanks Simon!).
+
+### Notes on using only one thread
 
 I also don't fully understand why some of the time during the workflow execution individual CPU 
 usages go to ~200% when I set `MultiThreaded.MaxCores=1` in `Mantid.user.properties`.
