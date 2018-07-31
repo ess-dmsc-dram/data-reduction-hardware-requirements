@@ -114,7 +114,7 @@ I also tried running two more workflows and ran into issues.
 
 #### SANS2D-binning.sh
 
-A script, that calls `run_SANS2DMinimalBatchReductionSlicedTest_V2.py` runs fine with 1 CPU but then just hangs at
+A script, that calls `run_SANS2DMinimalBatchReductionSlicedTest_V2.py` runs fine with 1 CPU but for 2 CPUs and above, it just hangs at
 ```
 LoadInstrument-[Notice] LoadInstrument successful, Duration 0.03 seconds
 ```
@@ -137,7 +137,7 @@ Traceback (most recent call last):
 
 #### HYSPECReductionTest.sh
 
-Taken from the system tests, I tried to use this workflow as it makes use of FilterEvents, but this failed on more than one CPU, saying that the algorithm does not support distributed workspaces
+Taken from the system tests, I tried to use this workflow as it makes use of `FilterEvents`, but this failed on more than one CPU, saying that the algorithm does not support distributed workspaces
 
 ```
 FilterByLogValue-[Notice] FilterByLogValue started
