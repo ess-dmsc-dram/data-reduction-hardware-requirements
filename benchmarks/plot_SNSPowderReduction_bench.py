@@ -129,6 +129,24 @@ cb5.ax.set_ylabel("Number of events")
 
 
 
+
+
+
+
+
+
+cube = np.where(data[:,1] == data[:,2])
+
+
+
+s6 = ax6.plot(data[:,1][cube],data[:,3][cube]/data[0,3],'o')
+ax6.set_xlabel("Number of CPUs")
+ax6.set_ylabel(r"Weak scaling efficiency (NCPU = grow factor)")
+
+
+
+
+
 #s6 = ax6.scatter(np.log10(binData[:,3]),np.log10(binData[:,2]),c=binData[:,1],cmap=cmap1)
 ##s1 = ax1.scatter(data[:,1],np.log10(data[:,3]),c=Nevents,cmap=cmap1)
 ##ax6.set_xlim([0,11])
@@ -166,7 +184,7 @@ ax2.text(xlab1,ylab,'b',ha='center',va='center',fontsize=lsize,transform = ax2.t
 ax3.text(xlab1,ylab,'c',ha='center',va='center',fontsize=lsize,transform = ax3.transAxes)
 ax4.text(xlab2,ylab,'d',ha='center',va='center',fontsize=lsize,transform = ax4.transAxes)
 ax5.text(xlab2,ylab,'e',ha='center',va='center',fontsize=lsize,transform = ax5.transAxes)
-ax6.text(xlab1,ylab,'f',ha='center',va='center',fontsize=lsize,transform = ax6.transAxes)
+ax6.text(xlab2,ylab,'f',ha='center',va='center',fontsize=lsize,transform = ax6.transAxes)
 
 fig.savefig("SNSPowderReduction_bench.png",bbox_inches="tight")
 
