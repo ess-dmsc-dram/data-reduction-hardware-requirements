@@ -8,6 +8,31 @@ file was created to run only the data generation. This is done once and for all 
 to be carried out every time the benchmark is run, the data in simply stored on disk (~85Gb). Note 
 that the disk is a classical HDD (Seagate Desktop HDD ST2000DM001 - 2 TB - SATA 6Gb/s - 7200 rpm).
 
+The file sizes are listed in the table below
+
+| Grow factor | Main file (77777) | Vanadium run (88888) | Vanadium background (99999) | Total |
+| ----------- |------------------ | ---------------------| --------------------------- | ----- |
+|  1          | 113M              |  392M                |  58M                        | 563M  |
+|  2          | 195M              |  696M                |  66M                        | 960M  |
+|  3          | 280M              | 1004M                |  74M                        | 1.4G  |
+|  4          | 362M              |  1.3G                |  82M                        | 1.8G  |
+|  5          | 446M              |  1.6G                |  90M                        | 2.2G  |
+|  6          | 529M              |  1.9G                |  98M                        | 2.5G  |
+|  7          | 613M              |  2.2G                | 106M                        | 2.9G  |
+|  8          | 695M              |  2.5G                | 114M                        | 3.3G  |
+|  9          | 780M              |  2.8G                | 122M                        | 3.7G  |
+| 10          | 863M              |  3.1G                | 130M                        | 4.1G  |
+| 11          | 947M              |  3.4G                | 138M                        | 4.5G  |
+| 12          | 1.1G              |  3.7G                | 146M                        | 4.9G  |
+| 13          | 1.1G              |  4.0G                | 154M                        | 5.3G  |
+| 14          | 1.2G              |  4.3G                | 162M                        | 5.6G  |
+| 15          | 1.3G              |  4.6G                | 170M                        | 6.0G  |
+| 16          | 1.4G              |  4.9G                | 177M                        | 6.4G  |
+| 17          | 1.5G              |  5.2G                | 186M                        | 6.8G  |
+| 18          | 1.5G              |  5.5G                | 194M                        | 7.2G  |
+| 19          | 1.6G              |  5.8G                | 202M                        | 7.6G  |
+| 20          | 1.7G              |  6.1G                | 210M                        | 8.0G  |
+
 The `SNSPowderReduction-binning.sh` script contains a loop over `grow` factor and number of cpus.
 Figure 1 shows the scaling performance of the workflow. Machine used: HP Z820 workstation (12 
 cores: 2x Intel(R) Xeon(R) CPU E5-2630 v2 @ 2.60GHz)
@@ -80,7 +105,7 @@ spent in each part of the workflow is shown in figure 2
 **Figure 2:** The left panel shows a linear percentage scale, while it is logarithmic in the right
 panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/timings.pdf) version of the figure.
 
-
+This was done for the largest file, with a `grow` factor of 20.
 
 
 **TODO:** ~~change the number of bins~~, get the workflow to use `FilterEvents`.  
