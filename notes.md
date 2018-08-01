@@ -76,8 +76,8 @@ The rationale for this equation is as follows:
 Experiments with a series of different workflows (SANS using the SANS2D workflow, powder diffraction using the `SNSPowderReduction` workflow for PG3, direct geometry using the `DgsReduction` workflow for CNCS) show a surprisingly consistent pattern, independent of the technique:
 
 - `t_0` is about 10 seconds.
-- `t_bin` varies from 1/1.000.0000 seconds for histogram-heavy reductions to about 1/10.000.000 seconds for reductions with near-ubiquitous use of event-mode.
-- `t_event` is about 1/1.000.0000 seconds, or slightly smaller.
+- `t_bin` varies from 1/1.000.000 seconds for histogram-heavy reductions to about 1/10.000.000 seconds for reductions with near-ubiquitous use of event-mode.
+- `t_event` is about 1/1.000.000 seconds, or slightly smaller.
 - `bandwidth_max` is about 1/50.000.000 seconds for an SSD, tests with a parallel file system are pending.
 
 These parameters are set in `performance_model.py`.

@@ -1,0 +1,313 @@
+\documentclass[a4paper,english,numbers=noenddot,bibliography=totoc,chapterprefix=on,DIV=12]{scrartcl}
+
+\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\PassOptionsToPackage{hyphens}{url}\usepackage{bookmark,hyperref}
+\usepackage{multirow}
+\usepackage[labelfont=bf,font=small]{caption}
+\usepackage[font=footnotesize]{subcaption}
+\usepackage{rotating}
+
+\usepackage{subcaption}
+\usepackage{tabularx}
+\usepackage{listings}
+
+\setcapindent{0mm}
+
+% boldmath in headings and toc, but not headers
+\def\bfseries{\fontseries \bfdefault \selectfont \boldmath}
+
+%allows footnotes in tabular
+\usepackage{footnote}
+\makesavenoteenv{tabular}
+
+% avoid space issues after macro
+\usepackage{xspace}
+\newcommand{\tof}{TOF\xspace}
+
+\newcommand{\Treduction}{t_{\text{reduction}}}
+\newcommand{\Trun}{t_{\text{run}}}
+\newcommand{\Tbin}{t_{\text{bin}}}
+\newcommand{\Tevent}{t_{\text{event}}}
+\newcommand{\Nbin}{N_{\text{bin}}}
+\newcommand{\Ncore}{N_{\text{core}}}
+\newcommand{\Nevent}{N_{\text{event}}}
+\newcommand{\Nreduction}{N_{\text{reduction}}}
+\newcommand{\Nspec}{N_{\text{spec}}}
+\newcommand{\Bmax}{B_{\text{max}}}
+\newcommand{\Fevent}{f_{\text{event}}}
+
+\begin{document}
+
+\title{Estimation of hardware requirements for data reduction with Mantid at ESS}
+\author{Simon Heybrock\\
+    {\small\href{mailto:simon.heybrock@esss.se}{\nolinkurl{simon.heybrock@esss.se}}}}
+
+\maketitle
+
+\tableofcontents
+
+various resolution settings/bin-counts for instrument
+list of benchmark runs/results and considered instrument
+example tables of required hardware (for some set of parameters)
+usage instructions for scripts
+discussion/interpretation
+effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
+effect of I/O bandwidth, in particular limits on reduction speed.
+required speedup
+discuss strong influence of run duration (and the ration of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
+discuss transition from single-machine reduction to reduction that requires MPI, when it happens for various instruments, relation to interactive reduction
+live reduction
+assumptions
+
+\section{Introduction}
+
+The aim of this document is to capture our understanding of what hardware resources will be required for reducing data with Mantid for ESS.
+While we attempt to give some estimates for, e.g., required core counts, it will become clear below there are too many uncertainties. In practice the main contribution of this document may thus be the description of how various parameters affect what hardware is required, allowing us the continuously update and improve our estimates.
+
+Data reduction covers three main cases, live reduction, interactive reduction, and script-based reduction.
+
+\paragraph{Live reduction}
+Preliminary/simplified on-the-fly reduction of data and visualization is a key promise of ESS and will be required for all instruments, any time the beam is on and at times probably also with beam off for other calibration work.
+It is critical that this is available at all times so a dedicated pool of hardware may be required.
+
+\paragraph{Interactive reduction} 
+The general view is that data at ESS will be so large that users cannot do data reduction on their laptop or desktop PC. Therefore DMSC needs to provide resources for all interactive workflows using the Mantid GUI (MantidPlot or its successor) for data reduction and visualization.
+This is required during a user visit as well as a certain time period after the experiment.
+Furthermore, we need to provide access to such resources \emph{before} an experiment such that users can familiarize themselves with the tools and provided software infrastructure, avoiding wasting beam time due to software problems.
+For interactive reduction, due to the interactive nature, high CPU use will alternate with shorter or longer idle breaks.
+However, generally there will be a rather large permanent memory requirement, i.e., clustering interactive user sessions on a single compute node is only possible to a limited extent, and will require nodes with a large amount of memory.
+
+\paragraph{Script-based reduction}
+Reduction of data based on a (Python) script.
+This covers automatic reduction and batch reduction.
+This is suitable for being run on a cluster using a standard queuing system with adequate means to ensure that queue lengths stay within limits.
+For example, one could imagine that jobs for data reduction of a running experiment need to be prioritized over modelling jobs of a experiment that happened a long time ago.
+
+\subsection{Threading and MPI support}
+
+The Mantid framework is multithreaded and algorithms run by a script or interactively by the GUI will typically run with multiple threads.
+To allow for scaling data reduction beyond a single node MPI support has been added to Mantid.
+MPI support is only available for script-based reduction.
+In principle it could also be used for live reduction, provided that it is only a passive way to observe raw and reduced data.
+There is no MPI support connected to the GUI and there are no plans for this either.\footnote{That is, there will be no equivalent to the client-server MPI mode supported by, e.g., ParaView}.
+
+In various benchmarks we observed that generally an equivalent threaded run of a Mantid reduction script takes longer than the same reduction done with MPI:\footnote{This is true even without the optimized MPI-based NeXus loader.}
+The scaling with the number of used cores is worse.
+The reason for this is not fully understood but it is probably related to the fork-join threading approach.
+Thus we cannot directly transfer results and scaling behaviors obtained for MPI to a threaded version of Mantid.
+For machines with a moderate number of cores of up to roughly 10 cores we can probably use the rule of thumb that the threaded reduction will be $2\times$ slower than the MPI reduction.
+
+\subsection{Event filtering}
+
+Many ESS instruments will require filtering events in one way or another.
+Benchmarks indicate that the contribution of this is to the overall runtime is less than $10\%$, i.e., we do not need to handle it explicitly in our evaluations.
+
+
+\section{Scaling analysis}
+
+The number of cores required for reduction depends on the required maximum runtime for a reduction.
+It is unclear what a good limit for the runtime $\Treduction$ is.
+For now we define:
+
+\begin{itemize}
+  \item The reduction should be 5 times faster than the experiment.
+  \item It should never take more than 20 minutes.
+  \item We never require a runtime below 30 seconds.
+\end{itemize}
+
+With a couple of approximations (which are probably minor for this purpose and compared to other sources of uncertainty) we can describe the time required to reduce a set of data as
+
+\begin{align}
+  \Treduction = t_0 + \frac{\Nbin\Tbin + \Nevent\Tevent}{\Ncore} + \frac{\Nevent}{\Bmax},
+  \label{eq:master}
+\end{align}
+where
+\begin{itemize}
+  \item $\Nbin$ is the number of bins in the workflow, i.e., the number of spectra $\Nspec$ multiplied by the number of bins per spectrum.\footnote{Typically $\Nspec$ is the number of pixels of the instrument, but it can be different, e.g., when data from pixels is split up, such as for event filtering or RRM.}
+    The number of bins per spectrum depends on the bandwidth and resolution of the instrument.
+    As a rule of thumb, for a given energy resolution $\Delta E$ we require a bin size of $\Delta E/10$.
+  \item $\Nevent$ is the total number of events that are being handled in the reduction workflow.
+    This can include events from multiple files, e.g., for a sample run and a background run.
+  \item $\Ncore$ is the number of cores (MPI ranks) used in the reduction.
+    We are not considering a hybrid threading+MPI approach (apart from a few specialized algorithms that are using threading internally).
+  \item $t_0$ is a constant time specific to the reduction workflow.
+    It includes anything that does not depend and the number of spectra or number of events.
+    Typically this includes small parts of the time spend in every algorithm, time for loading experiment logs from NeXus files, time for loading auxiliary files, and other overheads.
+  \item $\Tbin$ is the (computed) time to run the workflow for a single bin.
+  \item $\Tevent$ is the (computed) time to run the workflow for a single event.
+  \item $\Bmax$ is the number of events that can be loaded from the file system per second.
+\end{itemize}
+The equation is motivated by an analysis of benchmarks results and the computational structure of data reduction.
+$\Ncore$ can be adjusted such that $\Treduction$ fulfills the conditions listed above.
+There can be cases where the conditions are violated, e.g., when the event rate is high and $\Bmax$ is too low.
+More details on this equation can be found in App. \ref{app:master_eq}.
+
+Our benchmarks based on existing instruments and investigations of parameters for a series of ESS instruments show that any of the terms in Eq.~\eqref{eq:master} can be relevant or even dominant, depending on the instrument, the experiment, and the number of used cores.
+
+\begin{itemize}
+  \item 
+    For instruments that produce many small files (few spectra and events), the $t_0$ term can become dominant.
+    This can in theory be improved by processing multiple files in the same workflow, but at this point making such an assumption is not justified.
+    It is thus important to capture the typical run duration for each instrument.
+  \item
+    Even if the $t_0$ term is not dominant, a run may contain relatively few events relative to the pixel count.
+    In that case the $\Nbin$ term is important.
+    Given that many ESS instrument have a high pixel count this could very well become a dominating factor.\footnote{In many experiments the total number of events required for each measurement may not increase over present-day experiments. However, the ESS event \emph{rate} and pixel counts are higher, so the balance may shift to our disadvantage.}
+  \item
+    For instruments with many events we may be using many cores to offset the reduction cost.
+    In that limit the bandwidth-limiting term becomes relevant.
+\end{itemize}
+
+Based on the time for reducing a single run we can thus compute the average number of cores required for reducing data for the instrument.
+Note that this does \emph{not} include live reduction and interactive sessions.
+
+\begin{align}
+  \overline{\Ncore} = \Nreduction \Ncore \frac{\Treduction}{\Trun}.
+\end{align}
+
+Here:
+
+\begin{itemize}
+  \item $\Nreduction$ is the number of times data is reduced.
+    Typically this should be small, e.g., 1, 2, or 3, but especially in the early days there will be exceptions.
+  \item $\Trun$ is the duration of a single run.
+\end{itemize}
+
+For convenience, we can expand the master equation and obtain
+
+\begin{align}
+  \overline{\Ncore} &= \frac{\Nreduction}{\Trun}\left[\Ncore \left(t_0 + \frac{\Nevent}{\Bmax}\right) + \Nbin\Tbin + \Nevent\Tevent\right]\\
+   &= \Nreduction\left[\Ncore \left(\frac{t_0}{\Trun} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin}{\Trun} + \Fevent\Tevent\right]\\
+   &= \Nreduction\left[\Ncore \left(\frac{t_0\Fevent}{\Nevent} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin\Fevent}{\Nevent} + \Fevent\Tevent\right].
+\end{align}
+All three lines are simple variations of each other and are merely listed to highlight different aspects of the scaling behavior.
+
+It is important to note that $\overline{\Ncore}$ depends on $\Ncore$, i.e., the more cores we use, the higher our overall hardware requirement.
+Reasons for using more cores are primarily to (1) reduce the time for a single reduction to something that is acceptable for users, and (2) work around memory limitations on a single node.
+Furthermore, there are two terms that depend on $1/\Trun$, i.e., shorter runs will increase the number of required cores even if all other parameters such as the event rate $\Fevent$ are unchanged.
+
+
+\section{Live reduction}
+\section{Interactive reduction}
+\section{Script-based reduction}
+
+
+
+\section{Hardware components}
+
+\subsection{RAM}
+
+Some but not all reductions require a lot of RAM.
+Therefore, distinguishing between \emph{normal} and \emph{high-mem} machine configurations probably makes sense.
+TODO: How many high-mem nodes are required, compared to normal? What is normal, what is high?
+
+Typically faster RAM is more important than more cores (detailed benchmarks pending)?
+
+\subsection{Network}
+
+For data reduction, Mantid does not put particularly high demands on the interconnect between nodes.
+The most important factor is the speed of the connection to the file system.
+During file system reads and writes there will also be significant communication between nodes.
+Non-I/O algorithms in Mantid typically have either no communication or communication with only moderate latency and bandwidth requirements.
+While Ethernet is not sufficient, our current feeling is that any Infiniband network is, even if it is an older revision.
+
+\subsection{Disk I/O}
+
+
+
+\section{Interpretation}
+
+
+\section{Requirements}
+
+As discussed above, the number of cores required for reduction depends on the required maximum runtime for a reduction.
+It is unclear what a good limit for this is.
+For now we define the following:
+
+\begin{itemize}
+  \item In general the reduction should be 5 times faster than the experiment.
+  \item It should never take more than 20 minutes.
+  \item We never require a runtime below 30 seconds.
+\end{itemize}
+
+This is currently set in \verb|beamline.py|.
+
+
+\appendix
+
+\section{Related documentation}
+
+\begin{itemize}
+  \item Initial thoughts and plan for estimating hardware requirements:\\
+    \url{https://github.com/DMSC-Instrument-Data/documents/blob/master/mantid/hardware-requirements/plan.md}
+  \item Notes from meetings with instrument responsibles:\\
+    \url{https://confluence.esss.lu.se/display/DAM/Data+Reduction}
+\end{itemize}
+
+\section{Motivation of the performance master equation}
+\label{app:master_eq}
+
+The rationale for Eq.~\eqref{eq:master} is as follows:
+
+\begin{itemize}
+  \item For the vast majority of algorithms used in data reduction, all spectra are treated independently.
+  Thus there is a linear term in $\Nspec$ or $\Nbin$, but no higher order terms, and there is perfect scaling with $\Ncore$.
+\item Events in Mantid are stored with their respective spectrum.
+  Strictly speaking, we should thus include a term
+  \begin{align}
+    \Treduction^{\text{nonlinear}} &= \sum_{i=1}^{\Nspec} (N_{event,i} t_{event,linear} + N_{event,i} log N_{event,i} \Tevent^{\text{NlogN}} + ...),
+    \intertext{
+      i.e., a different term for each spectrum, depending on the number of events in that spectrum, and non-linear term, such as for sorting events.
+    However, events are usually spread over many spectra, so we can approximate}
+    N_{event,i} &\approx \Nevent/\Nspec.
+    \intertext{We obtain}
+    \Treduction^{\text{nonlinear}} &= \sum_{i=1}^{\Nspec} (\Nevent^i \Tevent^{\text{linear}} + \Nevent^i \log \Nevent^i \Tevent^{\text{NlogN}} + ...)\\
+    &\approx \sum_{i=1}^{\Nspec} (\frac{\Nevent}{\Nspec}  \Tevent^{\text{linear}} + \Nevent/\Nspec \log \frac{\Nevent}{\Nspec}  \Tevent^{\text{NlogN}} + ...)\\
+    &= \Nevent\Tevent^{\text{linear}} + \frac{\Nevent}{\Nspec} \sum_{i=1}^{\Nspec} (\log \frac{\Nevent}{\Nspec}  \Tevent^{\text{NlogN}} + ...)\\
+    &= \Nevent\Tevent^{\text{linear}} + \Nevent (\log \frac{\Nevent}{\Nspec}  \Tevent^{\text{NlogN}} + ...).
+    \intertext{The term in parenthesis depends on $\log (\Nevent/\Nspec)$ and \emph{not} $\log \Nevent$ (similar for higher order terms).
+  These terms are thus typically small and it seems reasonable to absorb them into the linear term}
+    &\approx \Nevent*\Tevent.
+  \end{align}
+  If instead events are peaked in a subset of spectra we approximate $N_{event,i} ~ (0 \text{ or } \Nevent/N_{\text{peak}}$, the approximation works in a similar way.
+\item Loading large event files is a significant contribution to the overall reduction time.
+  While the exact scaling of the new parallel event loader is unknown (no adequate parallel file system available), there is definitely a linearly scaling contribution that scales well with the number of cores and is thus already described by the $\Nevent*\Tevent$ term.
+  In addition to that, the other major factor is given by the upper limit of file system bandwidth.
+  Basically, this is a limit to the number of events that can be loaded per second.
+  This will also depend on whether or not compression is used in NeXus files.
+  We model this limit in the equation with the term $\Nevent/\Bmax$.
+  In case a parallel file system provides an bandwidth that is much higher on average than what was benchmarked for a local SSD, we may need to include a different term that captures limited scaling of the parallel loader.
+\item The time for reducing a spectrum will often depend linearly on the bin count.
+  Many instrument can adjust their resolution, usually by sacrificing brightness.
+  Thus the bin count will be fixed for a given run but can vary between runs within a instrument-specific range.
+\end{itemize}
+
+
+%We list possible and ongoing mitigations in Tab.~\ref{tab:unknown_factors}.
+
+%\begin{table}
+%    \small
+%\begin{tabularx}{\textwidth}{lXl}
+%    \hline
+%    what & potential solution & status \\
+%    \hline
+%    event rate & work based on highest estimates & ongoing \\
+%    available hardware & communicate (to instrument teams?) that there has to be a trade off between hardware cost and options in reduction, discuss with Sune & to do \\
+%    3D detectors & redesign Mantid instrument/geometry code, get more details from detector group & to do \\
+%    Mantid optimizations & depends on instrument/geometry redesign & blocked\\
+%    load/stream performance & do more benchmarks, work on improvements & to do \\
+%    complexer instruments & discuss details with instrument scientists from early on & started \\
+%    complexer science cases & discuss details with instrument scientists from early on & to do \\
+%    event mode & discuss options with Mantid team and instrument scientists & started \\
+%    monitors &  discuss options with Mantid team and instrument scientists & to do \\
+%    \hline
+%\end{tabularx}
+%\caption{\label{tab:unknown_factors}Unknown factors and mitigations.}
+%\end{table}
+
+
+\end{document}
