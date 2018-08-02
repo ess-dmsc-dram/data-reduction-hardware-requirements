@@ -37,7 +37,7 @@ The `SNSPowderReduction-binning.sh` script contains a loop over `grow` factor an
 Figure 1 shows the scaling performance of the workflow. Machine used: HP Z820 workstation (12 
 cores: 2x Intel(R) Xeon(R) CPU E5-2630 v2 @ 2.60GHz)
 
-![Figure 1](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/SNSPowderReduction_bench.png)
+![Figure 1](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/nvaytet/SNSPowderReduction/SNSPowderReduction_bench.png)
 
 **Figure 1:** Panel (b) shows that a larger number of events leads to a better speedup, which is expected as the 
 size of the parallel portion of the computational work increases. The times per event in panel (d) 
@@ -82,7 +82,7 @@ The columns represent (in order):
 
 ### Varying the number of bins
 
-![Figure 2](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/SNSPowderReduction_bins.png)
+![Figure 2](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/nvaytet/SNSPowderReduction/SNSPowderReduction_bins.png)
 
 Panel (a) shows the dependence of the workflow runtime on the number of bins, from 7728 to 247284.
 Panel (b) shows the number of bins processes per second per core (using the total workflow
@@ -100,7 +100,7 @@ The table containing the variable number of bins data is `SNSPowderReduction_bin
 We use the timings given my Mantid to get a rough profiling of the workflow. The percentage of time
 spent in each part of the workflow is shown in figure 2
 
-![Figure 2](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/timings.png)
+![Figure 2](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/nvaytet/SNSPowderReduction/timings.png)
 
 **Figure 2:** The left panel shows a linear percentage scale, while it is logarithmic in the right
 panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/timings.pdf) version of the figure.
