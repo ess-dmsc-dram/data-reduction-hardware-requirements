@@ -23,6 +23,7 @@
 %allows footnotes in tabular
 \usepackage{footnote}
 \makesavenoteenv{tabular}
+\makesavenoteenv{table}
 
 % avoid space issues after macro
 \usepackage{xspace}
@@ -39,6 +40,17 @@
 \newcommand{\Nspec}{N_{\text{spec}}}
 \newcommand{\Bmax}{B_{\text{max}}}
 \newcommand{\Fevent}{f_{\text{event}}}
+
+\newcommand{\beer}{BEER}
+\newcommand{\bifrost}{BIFROST}
+\newcommand{\cspec}{CSPEC}
+\newcommand{\dream}{DREAM}
+\newcommand{\estia}{ESTIA}
+\newcommand{\loki}{LoKI}
+\newcommand{\magic}{MAGIC}
+\newcommand{\odin}{ODIN}
+
+\newcommand{\nexus}{NeXus}
 
 \begin{document}
 
@@ -57,11 +69,11 @@ usage instructions for scripts
 discussion/interpretation
 effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
 effect of I/O bandwidth, in particular limits on reduction speed.
-required speedup
-discuss strong influence of run duration (and the ration of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
+discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
 discuss transition from single-machine reduction to reduction that requires MPI, when it happens for various instruments, relation to interactive reduction
 live reduction
 assumptions
+sample sizes, \dots
 
 \section{Introduction}
 
@@ -114,10 +126,17 @@ It is unclear what a good limit for the runtime $\Treduction$ is.
 For now we define:
 
 \begin{itemize}
-  \item The reduction should be 5 times faster than the experiment.
-  \item It should never take more than 20 minutes.
+  \item The reduction should be $5\times$ faster than the experiment.
+  \item To ensure that long-running experiments with low event rates are processed quickly we require that a minimum of $2\cdot10^6$ events/s are processed.
   \item We never require a runtime below 30 seconds.
 \end{itemize}
+A visualization of these requirements is given in Fig.~\ref{fig:reduction-time-requirement}.
+
+\begin{figure}
+  \centering
+\includegraphics[height=0.33\textheight]{reduction-time-requirement.pdf}
+\caption{\label{fig:reduction-time-requirement}Imposed requirements for the maximum reduction time. The checked areas indicate regions that are unreachable due to the defined limits. For runs that are short relative to the event rate we are governed by the 30-second limit. Above that limit, at low event rates the required reduction duration is low compared to the run duration. With increasing event rate we get closer to the limit of $5\times$ speedup indicated by the bold red line.}
+\end{figure}
 
 With a couple of approximations (which are probably minor for this purpose and compared to other sources of uncertainty) we can describe the time required to reduce a set of data as
 
@@ -190,6 +209,77 @@ It is important to note that $\overline{\Ncore}$ depends on $\Ncore$, i.e., the 
 Reasons for using more cores are primarily to (1) reduce the time for a single reduction to something that is acceptable for users, and (2) work around memory limitations on a single node.
 Furthermore, there are two terms that depend on $1/\Trun$, i.e., shorter runs will increase the number of required cores even if all other parameters such as the event rate $\Fevent$ are unchanged.
 
+\section{Input parameters}
+
+In Fig.~\ref{fig:accelerator-power} we show the estimate for the accelerator power ramp-up used in the following for scaling the expected event rates.
+
+\begin{figure}
+  \centering
+\includegraphics[height=0.33\textheight]{accelerator-power.pdf}
+\caption{\label{fig:accelerator-power}Estimate of accelerator power ramp up. ESS instrument scientists expect a linear scaling of the useable wavelength with the accelerator power.}
+\end{figure}
+
+\begin{table}
+  \centering
+  \begin{tabular}{lrrl}
+    Instrument & Pixel count day 1 & Pixel count final & Comment\\
+    \hline
+    \beer & 200k & 400k & not including SANS upgrade\\
+    \bifrost & ? & 5k & low pixel count but scanning\\
+    \cspec & 400k & 750k \\
+    % 1.25*32*6.2/(0.003*0.006) = 14000k
+    \dream & 4000 & 12000k & estimated\footnote{We did not yet receive pixel counts from DREAM, but MAGIC uses same technology with a pixel size of $3~\mathrm{mm} \times 6~\mathrm{mm}$ with 32 voxel layers. Full is $5.11~\mathrm{sr}$ with a sample-detector distance of $1.25~\mathrm{m}$. Day-1 coverage is $1.81~\mathrm{sr}$.}\\
+    \estia & 250k & 500k \\
+    \loki & 750k & 1500k \\
+    \magic & 1440k & 2880k \\
+    \odin & ? & ? & imaging is special case, handle separately?\\
+  \end{tabular}
+  \caption{\label{tab:pixel-counts}Pixel counts for the first eight instruments. Generally instruments to not have full detector coverage at day 1 and will add more pixels in an upgrade, typically a couple of years later.}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{llrrr}
+    Instrument & Configuration & use fraction & event rate & total event count \\
+    \hline
+    \hline
+    \multirow{6}{*}{\loki}
+    & 3m-high-flux    & 0.1 & $1.0\cdot10^7$ & $10^8$ \\
+    & 3m-small-sample & 0.1 & $3.33\cdot10^5$ & $10^8$ \\
+    & 5m-high-flux    & 0.1 & $1.92\cdot10^6$ & $10^8$ \\
+    & 5m-small-sample & 0.3 & $1.2\cdot10^5$ & $10^8$ \\
+    & 8m-high-flux    & 0.1 & $7.5\cdot10^5$ & $10^8$ \\
+    & 8m-small-sample & 0.3 & $4.69\cdot10^4$ & $10^8$ \\
+    \hline
+    \multirow{5}{*}{\estia} & reference-high-intensity\\ & reference-normal\\ & specular-high-intensity\\ & specular\\ & off-specular\\
+  \end{tabular}
+  \caption{\label{tab:configurations}Instrument configurations with expected event rates at full power and detector build-out.}
+\end{table}
+
+
+\section{Baseline benchmarks}
+
+To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bmax$ in Eq.~\eqref{eq:master} a number of benchmarks have been undertaken.
+
+\begin{enumerate}
+  \item Using an MPI-build of Mantid we measured run times of workflows for SANS, powder diffraction, and direct geometry spectroscopy (using the ISIS workflow for SANS2D, the \verb|SNSPowderDiffraction| workflow for PG3, and the \verb|DgsReduction| workflow for CNCS).
+    We studied the scaling behavior with the number of used cores (MPI ranks) and the number of events.
+    By looking at the various limits (few/many cores and few/many events) we can extract an approximation for $t_0$, $\Tbin$, $\Tevent$.
+    All these experiments were done on a single node, a dual-socket Xeon E5-2620 v3 running at 2.40GHz.
+  \item Scaling beyond a single node has been established in older benchmarks in 2015, again using the \verb|SNSPowderDiffraction|.
+    This benchmark showed that scaling beyond a single node does not lead to any significant slowdown and scaling works well up to a high number of MPI ranks.
+  \item For the special case of I/O we rely on benchmarks for the recently optimized parallel event loader for \nexus files.
+    Currently only benchmarks with a local SSD are available and show scaling up to nearly $10^8$ loaded events per second (slightly lower for compressed files) with 10 used cores.
+    Benchmarks with a parallel file system are pending.
+\end{enumerate}
+The experiments show a surprisingly consistent pattern, independent of the technique:
+
+\begin{itemize}
+\item $t_0$ is about 10 seconds.
+\item $\Tbin$ varies from 1/1.000.000 seconds for histogram-heavy reductions to about 1/10.000.000 seconds for reductions with near-ubiquitous use of event-mode.
+\item $\Tevent$ is about 1/1.000.000 seconds, or slightly smaller.
+\item $\Bmax$ is about 50.000.000 events/second for an SSD, tests with a parallel file system are pending.
+\end{itemize}
 
 \section{Live reduction}
 \section{Interactive reduction}

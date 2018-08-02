@@ -57,6 +57,13 @@ configs['MAGIC'] = {
     'count':[5e5, 5e5], # for each rotation, will have >1000, interpreting each rotation as individual run does not play well with current performance model?
     'use':[0.2, 0.8]}
 
+configs['DREAM'] = {
+    'name':['high-resolution', 'medium', 'high-intensity'],
+    'rate':[1.3e6, 1e7, 7.5e7],
+    'count':[5e8, 5e8, 5e8], # high resolution is 10 minutes per run
+    'use':[0.33, 0.33, 0.33]}
+
+
 
 loki = Beamline('LoKI')
 loki.add_phase(750000)
@@ -87,6 +94,13 @@ magic.add_phase(2880000)
 for name, use, rate, count in zip(configs['MAGIC']['name'], configs['MAGIC']['use'], configs['MAGIC']['rate'], configs['MAGIC']['count']):
     magic.add_config(name, use, rate/u.second, count)
 magic.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
+
+dream = Beamline('DREAM')
+dream.add_phase(4000000)
+dream.add_phase(12000000)
+for name, use, rate, count in zip(configs['DREAM']['name'], configs['DREAM']['use'], configs['DREAM']['rate'], configs['DREAM']['count']):
+    dream.add_config(name, use, rate/u.second, count)
+dream.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
 
 #ess.add_instrument('{}-phase1-{}'.format(instrument_name, config.name), InstrumentParams(num_pixel=750000, event_rate=config.rate, run_duration=required_events/config.rate, max_rate_compensation=1))
 
