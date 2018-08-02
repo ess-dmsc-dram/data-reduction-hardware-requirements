@@ -1,5 +1,7 @@
 # Summary of filtering benchmarks
 
+[TOC]
+
 ## SNSPowderReduction
 
 The `SNSPowderReduction` workflow was run using 1-10 cpus, and `grow.py` factors from 1-20.
@@ -152,6 +154,7 @@ The following timings for 1 CPU were obtained.
 **1. File loading:** 68.98s
 
 **2. Example 1 - Filtering event without correction on TOF:** `151.39s`
+
 Output:
 ```
 workspace tempsplitws_0 has 1240000 events
@@ -164,6 +167,7 @@ workspace tempsplitws_unfiltered has 506030000 events
 ```
 
 **3. Example 2 - Filtering event by a user-generated TableWorkspace:** `20.24s`
+
 Output:
 ```
 workspace tempsplitws3_a has 775800000 events
@@ -177,6 +181,7 @@ event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T
 ```
 
 **4. Example 3 - Filtering event by pulse time:** `33.50s`
+
 Output:
 ```
 workspace tempsplitws_1 has 1230000 events
@@ -188,6 +193,7 @@ workspace tempsplitws_6 has 50670000 events
 ```
 
 **5. Example 4 - Filtering event with correction on TOF:** `16.59s`
+
 Output:
 ```
 workspace tempsplitws_0 has 1230000 events
