@@ -39,8 +39,9 @@ class Beamline:
                     # events in the reduction is twice that of the run:
                     sample_and_background = 1 + 1
                     i = Instrument(phase, sample_and_background*reduced_rate, run_duration)
-                    output = '{:4.1f} MW {:6} {:7} pixels {:.3f} {:30} {:6.0} n/s {:6.0f} run[s]'.format(power, self.name, phase, use_fraction, name, reduced_rate.value, run_duration.value)
-                    reduction_duration = min(max(run_duration/speedup, 30 * u.second), 1200 * u.second)
+                    output = '{:4.1f} MW {:6} {:8} pixels {:.3f} {:30} {:6.0} n/s {:6.0f} run[s]'.format(power, self.name, phase, use_fraction, name, reduced_rate.value, run_duration.value)
+                    reduction_rate_min = 2e6 / u.second
+                    reduction_duration = max(min(run_duration/speedup, reduced_rate*run_duration/reduction_rate_min), 30 * u.second)
                     resources = i.required_resources(reduction_duration)
                     # TODO take into account that not 100% of time is measurement time?
                     cores = resources['cores']

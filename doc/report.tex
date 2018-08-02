@@ -160,7 +160,7 @@ where
   \item $\Tevent$ is the (computed) time to run the workflow for a single event.
   \item $\Bmax$ is the number of events that can be loaded from the file system per second.
 \end{itemize}
-The equation is motivated by an analysis of benchmarks results and the computational structure of data reduction.
+The equation is motivated by an analysis of benchmark results (see Sec.~\ref{sec:benchmarks}) and the computational structure of data reduction.
 $\Ncore$ can be adjusted such that $\Treduction$ fulfills the conditions listed above.
 There can be cases where the conditions are violated, e.g., when the event rate is high and $\Bmax$ is too low.
 More details on this equation can be found in App. \ref{app:master_eq}.
@@ -175,7 +175,7 @@ Our benchmarks based on existing instruments and investigations of parameters fo
   \item
     Even if the $t_0$ term is not dominant, a run may contain relatively few events relative to the pixel count.
     In that case the $\Nbin$ term is important.
-    Given that many ESS instrument have a high pixel count this could very well become a dominating factor.\footnote{In many experiments the total number of events required for each measurement may not increase over present-day experiments. However, the ESS event \emph{rate} and pixel counts are higher, so the balance may shift to our disadvantage.}
+    Given that many ESS instruments have a high pixel count this could very well become a dominating factor.\footnote{In many experiments the total number of events required for each measurement may not increase over present-day experiments. However, the ESS event \emph{rate} and pixel counts are higher, so the balance may shift to our disadvantage.}
   \item
     For instruments with many events we may be using many cores to offset the reduction cost.
     In that limit the bandwidth-limiting term becomes relevant.
@@ -258,6 +258,7 @@ In Fig.~\ref{fig:accelerator-power} we show the estimate for the accelerator pow
 
 
 \section{Baseline benchmarks}
+\label{sec:benchmarks}
 
 To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bmax$ in Eq.~\eqref{eq:master} a number of benchmarks have been undertaken.
 
