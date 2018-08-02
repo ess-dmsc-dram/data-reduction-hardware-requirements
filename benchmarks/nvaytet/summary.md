@@ -1,7 +1,5 @@
 # Summary of filtering benchmarks
 
-[TOC]
-
 ## SNSPowderReduction
 
 The `SNSPowderReduction` workflow was run using 1-10 cpus, and `grow.py` factors from 1-20.
