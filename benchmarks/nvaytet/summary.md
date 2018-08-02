@@ -1,4 +1,6 @@
-## SNSPowderReduction benchmark
+# Summary of filtering benchmarks
+
+## SNSPowderReduction
 
 The `SNSPowderReduction` workflow was run using 1-10 cpus, and `grow.py` factors from 1-20.
 
@@ -100,7 +102,7 @@ The table containing the variable number of bins data is `SNSPowderReduction_bin
 We use the timings given my Mantid to get a rough profiling of the workflow. The percentage of time
 spent in each part of the workflow is shown in figure 2
 
-![Figure 2](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/nvaytet/SNSPowderReduction/timings.png)
+![Figure 3](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/nvaytet/SNSPowderReduction/timings.png)
 
 **Figure 2:** The left panel shows a linear percentage scale, while it is logarithmic in the right
 panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/timings.pdf) version of the figure.
@@ -141,11 +143,91 @@ KiB Swap:  2097148 total,  1720176 free,   376972 used. 61295564 avail Mem
   311 nvaytet   20   0 1314136  87524  15820 S   1.3  0.1  35:24.84 mate-terminal
 ```
 
-### Other tests
+## FilterEvents
+
+The examples from the `FilterEvents` [documentation page](http://docs.mantidproject.org/nightly/algorithms/FilterEvents-v1.html) were benchmarked. The input file used was grown to contain 1122660000 events (1.7GB on disk).
+
+The following timings for 1 CPU were obtained.
+
+**1. File loading:** 68.98s
+
+**2. Example 1 - Filtering event without correction on TOF:** `151.39s`
+Output:
+```
+workspace tempsplitws_0 has 1240000 events
+workspace tempsplitws_1 has 169151818 events
+workspace tempsplitws_2 has 100088182 events
+workspace tempsplitws_3 has 69620000 events
+workspace tempsplitws_4 has 225199163 events
+workspace tempsplitws_5 has 51330837 events
+workspace tempsplitws_unfiltered has 506030000 events
+```
+
+**3. Example 2 - Filtering event by a user-generated TableWorkspace:** `20.24s`
+Output:
+```
+workspace tempsplitws3_a has 775800000 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:10:17Z.
+workspace tempsplitws3_b has 0 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:11:57Z.
+workspace tempsplitws3_c has 0 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:15:17Z.
+workspace tempsplitws3_unfiltered has 346860000 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:10:17Z.
+```
+
+**4. Example 3 - Filtering event by pulse time:** `33.50s`
+Output:
+```
+workspace tempsplitws_1 has 1230000 events
+workspace tempsplitws_2 has 169510000 events
+workspace tempsplitws_3 has 99720000 events
+workspace tempsplitws_4 has 70190000 events
+workspace tempsplitws_5 has 225290000 events
+workspace tempsplitws_6 has 50670000 events
+```
+
+**5. Example 4 - Filtering event with correction on TOF:** `16.59s`
+Output:
+```
+workspace tempsplitws_0 has 1230000 events
+workspace tempsplitws_1 has 169510000 events
+workspace tempsplitws_2 has 99720000 events
+workspace tempsplitws_3 has 70190000 events
+workspace tempsplitws_4 has 225140924 events
+workspace tempsplitws_5 has 50819076 events
+workspace tempsplitws_unfiltered has 506050000 events
+```
+
+**6. Example 2 - Modified:** `154.63s`
+
+Looking at the results of Example 2, two output workspaces contained no data. The filtering limits were modified to
+```
+split_table_ws.addRow([0., 33., 'a'])
+split_table_ws.addRow([34., 66., 'b'])
+split_table_ws.addRow([67., 99., 'c'])
+split_table_ws.addRow([100., 650., 'b'])
+```
+and the scripts now outputs
+```
+workspace tempsplitws3_a has 420970733 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:09:10Z.
+workspace tempsplitws3_b has 453660950 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:09:11Z.
+workspace tempsplitws3_c has 230740000 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:09:44Z.
+workspace tempsplitws3_unfiltered has 17288317 events
+event splitter log: entry 0 and entry 1 are 2010-03-25T16:08:37Z and 2010-03-25T16:09:10Z.
+```
+
+**Note:** the run time has significantly increased from 20s to 155s.
+
+
+## Other tests
 
 I also tried running two more workflows and ran into issues.
 
-#### SANS2D-binning.sh
+### SANS2D-binning.sh
 
 A script, that calls `run_SANS2DMinimalBatchReductionSlicedTest_V2.py` runs fine with 1 CPU but for 2 CPUs and above, it just hangs at
 ```
@@ -168,7 +250,7 @@ Traceback (most recent call last):
     raise NotImplementedError("The file type you have provided is not implemented yet.")
 ```
 
-#### HYSPECReductionTest.sh
+### HYSPECReductionTest.sh
 
 Taken from the system tests, I tried to use this workflow as it makes use of `FilterEvents`, but this failed on more than one CPU, saying that the algorithm does not support distributed workspaces
 
