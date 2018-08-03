@@ -75,12 +75,37 @@ configs['DREAM'] = {
     'num_bin':[71000, 10000, 1420],
     'use':[0.33, 0.33, 0.33]}
 
+configs['BEER'] = {
+    'phases':[200000,400000],
+    'name':['medium-resolution', 'medium-resolution-multiplexing', 'high-flux-multiplexing'],
+    'rate':[3e5, 2e6, 5e7],
+    'count':[1e6, 1e6, 1e6], # same run but scanning the sample volume quickly? TODO is this realistic?
+    'num_bin':[2000, 2000, 8500],
+    'use':[0.7, 0.2, 0.1]}
+
+configs['BIFROST'] = {
+    'phases':[5000],
+    'name':['high-flux', 'average'],
+    'rate':[1e6, 1e5],
+    'count':[1e6, 1e6], # TODO
+    'num_bin':[2000, 2000], #TODO
+    'use':[0.2, 0.8]}
+
+# Handling imaging with these equations does not make sense, I believe.
+#configs['ODIN'] = {
+#    'phases':[262144, 1048576], # Berkley detectors
+#    'name':[''],
+#    'rate':[1e6],
+#    'count':[1e6], # TODO
+#    'num_bin':[2804], #TODO
+#    'use':[0.2, 0.8]}
+
 for name, config in configs.items():
     beamline = Beamline(name)
     for phase in config['phases']:
         beamline.add_phase(phase)
-    for name, use, rate, num_bin in zip(config['name'], config['use'], config['rate'], config['num_bin']):
-        beamline.add_config(name, use, rate/u.second, 1e8, num_bin)
+    for name, use, rate, num_bin, count in zip(config['name'], config['use'], config['rate'], config['num_bin'], config['count']):
+        beamline.add_config(name, use, rate/u.second, count, num_bin)
     beamline.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
 
 # TODO CSPEC: How to take into account RRM factor 10 in number of histograms? -> use num_bin

@@ -42,16 +42,16 @@
 \newcommand{\Bmax}{B_{\text{max}}}
 \newcommand{\Fevent}{f_{\text{event}}}
 
-\newcommand{\beer}{BEER}
-\newcommand{\bifrost}{BIFROST}
-\newcommand{\cspec}{CSPEC}
-\newcommand{\dream}{DREAM}
-\newcommand{\estia}{ESTIA}
-\newcommand{\loki}{LoKI}
-\newcommand{\magic}{MAGIC}
-\newcommand{\odin}{ODIN}
+\newcommand{\beer}{BEER\xspace}
+\newcommand{\bifrost}{BIFROST\xspace}
+\newcommand{\cspec}{CSPEC\xspace}
+\newcommand{\dream}{DREAM\xspace}
+\newcommand{\estia}{ESTIA\xspace}
+\newcommand{\loki}{LoKI\xspace}
+\newcommand{\magic}{MAGIC\xspace}
+\newcommand{\odin}{ODIN\xspace}
 
-\newcommand{\nexus}{NeXus}
+\newcommand{\nexus}{NeXus\xspace}
 
 \begin{document}
 
@@ -63,18 +63,14 @@
 
 \tableofcontents
 
-various resolution settings/bin-counts for instrument
 list of benchmark runs/results and considered instrument
 example tables of required hardware (for some set of parameters)
 usage instructions for scripts
-discussion/interpretation
 effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
 effect of I/O bandwidth, in particular limits on reduction speed.
 discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
 discuss transition from single-machine reduction to reduction that requires MPI, when it happens for various instruments, relation to interactive reduction
 live reduction
-assumptions
-sample sizes, \dots
 
 \section{Introduction}
 
@@ -283,6 +279,24 @@ The experiments show a surprisingly consistent pattern, independent of the techn
 \item $\Bmax$ is about 50.000.000 events/second for an SSD, tests with a parallel file system are pending.
 \end{itemize}
 
+
+\section{Results}
+
+Example core counts as well as average core counts are given in Tab.~\ref{}.
+Provided that the compute cluster is hard enough summing the average core counts could yield the required size of the compute cluster.
+However, there are clearly cases with high peak-core requirements.
+Furthermore, in the early days with few operating instruments and a smaller cluster it needs to be ensured that an appropriate partition is always available within a to be defined time frame.
+Determining the resulting required size of the compute cluster is beyond the scope of this investigation.
+
+\subsection{Other factors}
+
+With low accelerator power and lower detector coverage in the early it is to be expected that the type of experiments will be different from what is envisioned for full power.
+For example, larger samples will be used to compensate for the lower rates.
+The compensation could be of up to a order of magnitude in size, at least for certain experiments.
+While some instruments indicate they will do so, e.g., \loki and \dream, not all of them will, e.g., \cspec.
+We have \emph{not} included a scaling term to represent this effect in the numbers given in this document.
+Ensuring that the compute cluster size ramp up is sufficiently ahead of the accelerator power ramp up could help to deal with this uncertainty.
+
 \section{Live reduction}
 \section{Interactive reduction}
 \section{Script-based reduction}
@@ -321,10 +335,18 @@ While Ethernet is not sufficient, our current feeling is that any Infiniband net
 \section{Related documentation}
 
 \begin{itemize}
+  \item Repository containing scripts to produce data in this document as well as the source for this document:\\
+    \url{https://github.com/DMSC-Instrument-Data/data-reduction-hardware-requirements}
   \item Initial thoughts and plan for estimating hardware requirements:\\
     \url{https://github.com/DMSC-Instrument-Data/documents/blob/master/mantid/hardware-requirements/plan.md}
   \item Notes from meetings with instrument responsibles:\\
     \url{https://confluence.esss.lu.se/display/DAM/Data+Reduction}
+  \item Benchmarks for live reduction:\\
+    \url{https://github.com/DMSC-Instrument-Data/documents/blob/master/investigations/Live%20Reduction/LiveReductionInvestigation.md}
+  \item Benchmarks for event filtering:\\
+    \url{https://github.com/DMSC-Instrument-Data/data-reduction-hardware-requirements/blob/master/benchmarks/nvaytet/summary.md}
+  \item \odin data rate report:\\
+    \url{https://confluence.esss.lu.se/download/attachments/274116159/report_ODIN_data_rate_volume.pdf?api=v2}
 \end{itemize}
 
 \section{Motivation of the performance master equation}
@@ -388,6 +410,12 @@ From the original proposal:
 \begin{itemize}
   \item The (useful) range of the pulse shaping is $10~\mathrm{\mu s}$ to $500~\mathrm{\mu s}$.
     We thus obtain $10\times71~\mathrm{ms}/10~\mathrm{\mu s} = 71000$ bins for the highest resolution and $10\times71~\mathrm{ms}/500~\mathrm{\mu s} = 1420$ for the lowest resolution.
+\end{itemize}
+
+\subsection{\beer}
+
+\begin{itemize}
+  \item According to the original proposal, resolution settings range from 0.1\% to 1\%. The wavelength band is $1.7~\angstrom$ but there are chopper settings to double it using pulse skipping. For a wavelength band centered at $2~\angstrom$ this yields bins counts of $10\times1.7~\angstrom/(0.01\cdot2~\angstrom) = 850$ for the low resolution setting and $10\times1.7~\angstrom/(0.001\cdot2~\angstrom) = 8500$ for the highest resolution.
 \end{itemize}
 
 %We list possible and ongoing mitigations in Tab.~\ref{tab:unknown_factors}.
