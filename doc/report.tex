@@ -298,6 +298,38 @@ We have \emph{not} included a scaling term to represent this effect in the numbe
 Ensuring that the compute cluster size ramp up is sufficiently ahead of the accelerator power ramp up could help to deal with this uncertainty.
 
 \section{Live reduction}
+
+In Tab.~\ref{tab:consumption-rate} we show benchmark results for the event consumption rate of the Kafka event listener in Mantid without processing or visualization).
+This test is done using a default (non-MPI) build of Mantid.
+MPI support for the Kafka listener is not implemented currently.
+
+With the exception of the SANS2D data point at $10^5$ the scaling with the event rate is linear.\footnote{It is likely that for the high rate of more than 1000 frames per second other effects become relevant. Since we are not interested in such high frame rates we ignore this data point and assume linear scaling.}
+The benchmarks also show a (very approximately) linear scaling of the consumption rate with the number of pixels.
+This is not entirely expected.
+There are two aspects that can be used to explain the scaling:
+With more pixels that write behavior to the \verb|EventWorkspace| becomes more random leading to a less and less efficient use of cache and the rest of the memory subsystem.
+This effect should be expected to reach a steady state above a certain number of pixels.
+In addition to that, a separate vector needs to be allocated for every pixel to store the events.
+This allocation cost could grow linearly with the pixel count.
+
+\begin{table}
+  \centering
+  \begin{tabular}{c|rrr}
+    Instrument & SANS2D & MERLIN & WISH\\
+    Pixel count & 122888 & 286729 & 778245\\
+    \hline
+    $10^5$ events in 14 frames & 1379 & 915 & 400 \\
+    $10^6$ events in 14 frames & 284 & 93 & 38 \\
+    $10^7$ events in 14 frames & 23 & 8 & 3 \\
+  \end{tabular}
+  \caption{\label{tab:consumption-rate}Number of consumed frames per second. For ESS there are 14 frames (pulses) per second, i.e., we require a consumption rate of at least 14. The update timeout is set to $1~\mathrm{s}$.}
+\end{table}
+
+TODO estimate rate values? equation? $rate = a N_event + b N_pixel$ 2D plot showing accessible regions?
+
+By increasing the update timeout, which was set to one second in Tab.~\ref{tab:consumption-rate}, the consumption rate can be improved moderately.
+
+
 \section{Interactive reduction}
 \section{Script-based reduction}
 
