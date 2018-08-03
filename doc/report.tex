@@ -28,6 +28,7 @@
 % avoid space issues after macro
 \usepackage{xspace}
 \newcommand{\tof}{TOF\xspace}
+\newcommand{\angstrom}{\textup{\AA}}
 
 \newcommand{\Treduction}{t_{\text{reduction}}}
 \newcommand{\Trun}{t_{\text{run}}}
@@ -127,7 +128,7 @@ For now we define:
 
 \begin{itemize}
   \item The reduction should be $5\times$ faster than the experiment.
-  \item To ensure that long-running experiments with low event rates are processed quickly we require that a minimum of $2\cdot10^6$ events/s are processed.
+  \item To ensure that long-running experiments with low event rates are processed quickly we require that a minimum of $2\cdot10^6$ events/s are processed. TODO this does not really work and runs into trouble for instruments with many pixels, need a better definition.
   \item We never require a runtime below 30 seconds.
 \end{itemize}
 A visualization of these requirements is given in Fig.~\ref{fig:reduction-time-requirement}.
@@ -264,7 +265,7 @@ To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bma
 
 \begin{enumerate}
   \item Using an MPI-build of Mantid we measured run times of workflows for SANS, powder diffraction, and direct geometry spectroscopy (using the ISIS workflow for SANS2D, the \verb|SNSPowderDiffraction| workflow for PG3, and the \verb|DgsReduction| workflow for CNCS).
-    We studied the scaling behavior with the number of used cores (MPI ranks) and the number of events.
+    We studied the scaling behavior with the number of used cores (MPI ranks), the number of events, and also the number of bins per spectrum.
     By looking at the various limits (few/many cores and few/many events) we can extract an approximation for $t_0$, $\Tbin$, $\Tevent$.
     All these experiments were done on a single node, a dual-socket Xeon E5-2620 v3 running at 2.40GHz.
   \item Scaling beyond a single node has been established in older benchmarks in 2015, again using the \verb|SNSPowderDiffraction|.
@@ -313,19 +314,6 @@ While Ethernet is not sufficient, our current feeling is that any Infiniband net
 \section{Interpretation}
 
 
-\section{Requirements}
-
-As discussed above, the number of cores required for reduction depends on the required maximum runtime for a reduction.
-It is unclear what a good limit for this is.
-For now we define the following:
-
-\begin{itemize}
-  \item In general the reduction should be 5 times faster than the experiment.
-  \item It should never take more than 20 minutes.
-  \item We never require a runtime below 30 seconds.
-\end{itemize}
-
-This is currently set in \verb|beamline.py|.
 
 
 \appendix
@@ -377,6 +365,30 @@ The rationale for Eq.~\eqref{eq:master} is as follows:
   Thus the bin count will be fixed for a given run but can vary between runs within a instrument-specific range.
 \end{itemize}
 
+\section{Instrument parameters}
+
+\subsection{\estia}
+
+From the original proposal:
+
+\begin{itemize}
+  \item Wavelength range is $5~\angstrom$ to $9.4~\angstrom$ with an intrinsic resolution of 2\% and 4\%, respectively.
+    In the simplest case with constant bin width this yields $10\times(9.4-5.0)/(0.02\cdot5.0) = 450$ bins, where the factor of 10 is the aforementioned rule of thumb to obtain a required bin count from a resolution.
+\end{itemize}
+
+\subsection{\magic}
+
+\begin{itemize}
+  \item The shortest pulse from the pulse-shaping chopper is $100~\mathrm{\mu s}$ yielding $10\times71~\mathrm{ms}/100~\mathrm{\mu s} = 7100$ bins, where $71~\mathrm{ms}$ is the time to the next pulse.
+    While there is a high-flux option, my understanding is that this depends on collimation while the pulse-shaping is unchanged, i.e., we always have this pulse length.
+\end{itemize}
+
+\subsection{\dream}
+
+\begin{itemize}
+  \item The (useful) range of the pulse shaping is $10~\mathrm{\mu s}$ to $500~\mathrm{\mu s}$.
+    We thus obtain $10\times71~\mathrm{ms}/10~\mathrm{\mu s} = 71000$ bins for the highest resolution and $10\times71~\mathrm{ms}/500~\mathrm{\mu s} = 1420$ for the lowest resolution.
+\end{itemize}
 
 %We list possible and ongoing mitigations in Tab.~\ref{tab:unknown_factors}.
 

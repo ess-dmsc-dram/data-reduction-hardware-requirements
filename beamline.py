@@ -24,11 +24,11 @@ class Beamline:
     def add_phase(self, num_pixel):
         self.phases.append(num_pixel)
 
-    def add_config(self, name, use_fraction, event_rate, event_count):
-        self.configs.append((name, use_fraction, event_rate, event_count))
+    def add_config(self, name, use_fraction, event_rate, event_count, num_bin=5000):
+        self.configs.append((name, use_fraction, event_rate, event_count, num_bin))
 
     def run(self, accelerator_power, speedup):
-        for name, use_fraction, rate, count in self.configs:
+        for name, use_fraction, rate, count, num_bin in self.configs:
             for phase_id, phase in enumerate(self.phases):
                 assert phase <= self.phases[-1] # phases must be ordered, highest pixel count last
                 for power in accelerator_power:
@@ -38,7 +38,7 @@ class Beamline:
                     # For now we assume that both have similar size, i.e., the effective number of
                     # events in the reduction is twice that of the run:
                     sample_and_background = 1 + 1
-                    i = Instrument(phase, sample_and_background*reduced_rate, run_duration)
+                    i = Instrument(phase, sample_and_background*reduced_rate, run_duration, num_bin)
                     output = '{:4.1f} MW {:6} {:8} pixels {:.3f} {:30} {:6.0} n/s {:6.0f} run[s]'.format(power, self.name, phase, use_fraction, name, reduced_rate.value, run_duration.value)
                     reduction_rate_min = 2e6 / u.second
                     reduction_duration = max(min(run_duration/speedup, reduced_rate*run_duration/reduction_rate_min), 30 * u.second)
