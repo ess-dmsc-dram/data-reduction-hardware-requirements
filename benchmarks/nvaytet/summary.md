@@ -105,7 +105,7 @@ spent in each part of the workflow is shown in figure 2
 ![Figure 3](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/nvaytet/SNSPowderReduction/timings.png)
 
 **Figure 2:** The left panel shows a linear percentage scale, while it is logarithmic in the right
-panel. You can also download a [pdf](https://raw.githubusercontent.com/nvaytet/data-reduction-hardware-requirements/master/benchmarks/timings.pdf) version of the figure.
+panel.
 
 This was done for the largest file, with a `grow` factor of 20.
 
