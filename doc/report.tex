@@ -190,6 +190,7 @@ Here:
 
 For convenience, we can expand the master equation and obtain
 
+%TODO include factor for use-fraction and use same symbol when generating tables
 \begin{align}
   \overline{\Ncore} &= \frac{\Nreduction}{\Trun}\left[\Ncore \left(t_0 + \frac{\Nevent}{\Bmax}\right) + \Nbin\Tbin + \Nevent\Tevent\right]\\
    &= \Nreduction\left[\Ncore \left(\frac{t_0}{\Trun} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin}{\Trun} + \Fevent\Tevent\right]\\
@@ -405,6 +406,62 @@ Thus simply adding the required 5 sessions to the required numbers for data anal
 
 list of benchmark runs/results and considered instrument
 example tables of required hardware (for some set of parameters)
+
+\begin{table}
+  \scriptsize
+  \input{../BEER.tex}
+  \caption{\label{tab:hardware-beer}
+\beer.
+}
+\end{table}
+
+\begin{table}
+  \footnotesize
+  \input{../BIFROST.tex}
+  \caption{\label{tab:hardware-bifrost}
+\bifrost.
+}
+\end{table}
+
+\begin{table}
+  \footnotesize
+  \input{../CSPEC.tex}
+  \caption{\label{tab:hardware-cspec}
+\cspec.
+}
+\end{table}
+
+\begin{table}
+  \footnotesize
+  \input{../DREAM.tex}
+  \caption{\label{tab:hardware-dream}
+\dream.
+}
+\end{table}
+
+\begin{table}
+  \scriptsize
+  \input{../ESTIA.tex}
+  \caption{\label{tab:hardware-estia}
+\estia.
+}
+\end{table}
+
+\begin{table}
+  \scriptsize
+  \input{../LoKI.tex}
+  \caption{\label{tab:hardware-loki}
+\loki.
+}
+\end{table}
+
+\begin{table}
+  \footnotesize
+  \input{../MAGIC.tex}
+  \caption{\label{tab:hardware-magic}
+\magic.
+}
+\end{table}
 
 appendix: usage instructions for scripts
 

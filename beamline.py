@@ -2,6 +2,7 @@ from math import ceil
 from astropy import units as u
 
 from instrument import Instrument
+from latex_output import LatexTabular
 
 def memory_requirement(num_pixel, num_event, num_core, num_bin):
     # Assumptions:
@@ -27,9 +28,12 @@ class Beamline:
         self.configs.append((name, use_fraction, event_rate, event_count, num_bin))
 
     def run(self, accelerator_power, speedup):
-        for name, use_fraction, rate, count, num_bin in self.configs:
-            for phase_id, phase in enumerate(self.phases):
-                assert phase <= self.phases[-1] # phases must be ordered, highest pixel count last
+        latex = LatexTabular(len(self.configs))
+        for phase_id, phase in enumerate(self.phases):
+            assert phase <= self.phases[-1] # phases must be ordered, highest pixel count last
+            latex.set_pixel_count(phase)
+            for name, use_fraction, rate, count, num_bin in self.configs:
+                latex.set_config(name)
                 for power in accelerator_power:
                     reduced_rate = rate*power/5.0*phase/self.phases[-1]
                     run_duration = count/reduced_rate
@@ -50,8 +54,11 @@ class Beamline:
                         reductions_per_run = 2
                         average_cores = ceil(use_fraction*reductions_per_run*(actual_duration/run_duration)*cores)
                         output += ' {:6.0f} reduction[s] {:4} cores {:6.0f} average-cores'.format(actual_duration.value, cores, average_cores)
-                        output += ' {:4.0f} GByte/core'.format(ceil(memory_requirement(phase, reduced_rate*run_duration, cores, num_bin).value/2**30/cores))
+                        mem_per_core = ceil(memory_requirement(phase, reduced_rate*run_duration, cores, num_bin).value/2**30/cores)
+                        output += ' {:4.0f} GByte/core'.format(mem_per_core)
+                        latex.add(power, use_fraction, reduced_rate.value, run_duration.value, actual_duration.value, cores, average_cores, mem_per_core)
                     except:
                         output += ' {:6} reduction[s] {:3} cores {:4} average-cores'.format('   inf', ' inf', '   inf')
                     print(output)
+        return latex.lines
 
