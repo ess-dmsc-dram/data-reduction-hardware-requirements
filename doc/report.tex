@@ -63,14 +63,8 @@
 
 \tableofcontents
 
-list of benchmark runs/results and considered instrument
-example tables of required hardware (for some set of parameters)
-usage instructions for scripts
 effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
-effect of I/O bandwidth, in particular limits on reduction speed.
 discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
-discuss transition from single-machine reduction to reduction that requires MPI, when it happens for various instruments, relation to interactive reduction
-live reduction
 
 \section{Introduction}
 
@@ -97,6 +91,7 @@ This is suitable for being run on a cluster using a standard queuing system with
 For example, one could imagine that jobs for data reduction of a running experiment need to be prioritized over modelling jobs of a experiment that happened a long time ago.
 
 \subsection{Threading and MPI support}
+\label{sec:threading-and-mpi-support}
 
 The Mantid framework is multithreaded and algorithms run by a script or interactively by the GUI will typically run with multiple threads.
 To allow for scaling data reduction beyond a single node MPI support has been added to Mantid.
@@ -327,7 +322,7 @@ This allocation cost could grow linearly with the pixel count.
 
 By increasing the update timeout, which was set to one second in Tab.~\ref{tab:consumption-rate}, the consumption rate can be improved moderately.
 A couple of other optimization also appear to be possible.
-On the other hand, live display of the raw data using the \verb|InstrumentView|, simple data reduction, and live display of the reduced data add extra overhead.
+On the other hand, live display of the raw data using the \verb|InstrumentView|, (simplified) data reduction, and live display of the reduced data add extra overhead.
 Combining these opposite effects, which --- according to preliminary benchmarks --- all appear to be in the order of a $2\times$ change, leads us to conclude that the numbers given in Tab.~\ref{tab:consumption-rate} are a reasonable estimate.
 That is, without having access to much more detailed workflows and instrument models we have the crude estimate
 
@@ -348,7 +343,7 @@ With increasing accelerator power, $\Fevent$ increases and $R_{\text{live}}$ dec
 We require $R_{\text{live}} > 1$ to be able to handle the data.
 The plot range has been chosen accordingly --- a graph hitting the lower horizontal axis implies that the rate cannot be handled anymore.
 For \bifrost the pixel count is very low and we are not confident that we can extrapolate the scaling benchmarks from Tab.~\ref{tab:consumption-rate} this far.
-We have therefore not included a panel for \bifrost but expect that the rate can be handled even at a power of $5~\mathrm{MW}$.
+We have therefore excluded the panel for \bifrost but expect that the rate can be handled even at a power of $5~\mathrm{MW}$.
 The imaging beamline \odin is a special case and has thus also been excluded from this figure.
 }
 \end{figure}
@@ -362,9 +357,56 @@ Furthermore, UX is likely to be a bigger issue than performance in this case.
 We consider it unlikely that this scenario will cause a significant overall difference in the required hardware by the time it will be required.
 
 \section{Interactive reduction}
+
+As discussed in Sec.~\ref{sec:threading-and-mpi-support} there is not MPI support for the GUI or interactive reduction in general and therefore the is limit scaling the number of available cores.
+Generally we do not expect good scaling far beyond 10 cores.
+For reductions that are too slow in that case there are several options that can be used in practice:
+\begin{itemize}
+  \item Use slow interactive reduction for a single run/sample, apply resulting workflow to other samples using script-based reduction on the cluster.
+  \item Use interactive reduction using a reduced or compressed set of data, e.g., by loading only every $N$-th pulse or by compressing events, apply resulting workflow to other samples using script-based reduction on the cluster.
+  \item Use slow interactive reduction and use different sessions to do something else in the meantime, such as reducing another sample.
+\end{itemize}
+With exception of the second option, there is a minimum amount of required total RAM.
+We give example requirements for various instrument configurations in Tab.~\ref{tab:total-ram}.
+
+\begin{table}
+  \centering
+  \begin{tabular}{lrlr}
+    Instrument & Pixels & Mode & Typical minimum RAM\\
+    \hline
+    \multirow{12}{*}{\loki}
+    & \multirow{6}{*}{750000}
+    & 3m-high-flux    & \\
+    && 3m-small-sample & \\
+    && 5m-high-flux    & \\
+    && 5m-small-sample & \\
+    && 8m-high-flux    & \\
+    && 8m-small-sample & \\\cline{2-4}
+    & \multirow{6}{*}{1500000}
+    & 3m-high-flux    & \\
+    && 3m-small-sample & \\
+    && 5m-high-flux    & \\
+    && 5m-small-sample & \\
+    && 8m-high-flux    & \\
+    && 8m-small-sample & \\
+    \hline
+  \end{tabular}
+  \caption{\label{tab:total-ram}
+Approximate total RAM requirement for data reduction.
+}
+\end{table}
+
+Instrument scientist expect that typically 5 interactive sessions would be required per instrument at any given time.
+This figure is to be combined with requirements for data analysis since typically the interactive sessions would be used for both, data reduction and data analysis.
+For data reduction, a lot of the time Mantid will actually be idle or unused.
+Thus simply adding the required 5 sessions to the required numbers for data analysis is likely to overestimate the required resources.
+
 \section{Script-based reduction}
 
+list of benchmark runs/results and considered instrument
+example tables of required hardware (for some set of parameters)
 
+appendix: usage instructions for scripts
 
 \section{Hardware components}
 
@@ -386,6 +428,7 @@ While Ethernet is not sufficient, our current feeling is that any Infiniband net
 
 \subsection{Disk I/O}
 
+effect of I/O bandwidth, in particular limits on reduction speed.
 
 
 \section{Interpretation}
