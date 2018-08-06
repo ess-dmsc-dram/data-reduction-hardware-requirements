@@ -325,10 +325,41 @@ This allocation cost could grow linearly with the pixel count.
   \caption{\label{tab:consumption-rate}Number of consumed frames per second. For ESS there are 14 frames (pulses) per second, i.e., we require a consumption rate of at least 14. The update timeout is set to $1~\mathrm{s}$.}
 \end{table}
 
-TODO estimate rate values? equation? $rate = a N_event + b N_pixel$ 2D plot showing accessible regions?
-
 By increasing the update timeout, which was set to one second in Tab.~\ref{tab:consumption-rate}, the consumption rate can be improved moderately.
+A couple of other optimization also appear to be possible.
+On the other hand, live display of the raw data using the \verb|InstrumentView|, simple data reduction, and live display of the reduced data add extra overhead.
+Combining these opposite effects, which --- according to preliminary benchmarks --- all appear to be in the order of a $2\times$ change, leads us to conclude that the numbers given in Tab.~\ref{tab:consumption-rate} are a reasonable estimate.
+That is, without having access to much more detailed workflows and instrument models we have the crude estimate
 
+\begin{align}
+  R_{\text{live}} &= \frac{N_{\text{frame}}^{\text{max}}}{14} = \frac{3\cdot10^{13}~\mathrm{s}}{14\Fevent\Nspec} = \frac{2\cdot10^{12}~\mathrm{s}}{\Fevent\Nspec},
+\end{align}
+where $N_{\text{frame}}^{\text{max}}$ is the maximum number of consumed frames as in Tab.~\ref{tab:consumption-rate}, 14 is the number of frames per second at ESS, and $\Fevent$ is the event rate.
+We require $R_{\text{live}} > 1$ to be able to support live reduction without MPI.
+In Fig.~\ref{fig:live-reduction-no-mpi} we show the implications for the first ESS instruments, depending on the accelerator power.
+With the exception of \dream and possibly \magic, we seem to be able to handle most cases for most instruments even at higher accelerator power.
+However, we will definitely require MPI support in live reduction for \dream from day one.
+
+\begin{figure}
+  \centering
+\includegraphics[height=0.8317\textheight]{live-reduction-no-mpi.pdf}
+\caption{\label{fig:live-reduction-no-mpi}Reduction speed ratio $R_{\text{live}}$ for the first ESS instruments.
+With increasing accelerator power, $\Fevent$ increases and $R_{\text{live}}$ decreases.
+We require $R_{\text{live}} > 1$ to be able to handle the data.
+The plot range has been chosen accordingly --- a graph hitting the lower horizontal axis implies that the rate cannot be handled anymore.
+For \bifrost the pixel count is very low and we are not confident that we can extrapolate the scaling benchmarks from Tab.~\ref{tab:consumption-rate} this far.
+We have therefore not included a panel for \bifrost but expect that the rate can be handled even at a power of $5~\mathrm{MW}$.
+The imaging beamline \odin is a special case and has thus also been excluded from this figure.
+}
+\end{figure}
+
+There is another aspect that we have not covered yet.
+For experiments with very high throughput, i.e., quick changes of sample or sample-environment parameters, we would require additional complexity in the live reduction.
+This could include more advanced filtering, display and comparison of multiple results at the same time, and overhead from frequent transitions to a new run.
+We have not yet started development of these features so benchmarks are not available.
+That being said, high throughput experiments are not likely to required in the early days.
+Furthermore, UX is likely to be a bigger issue than performance in this case.
+We consider it unlikely that this scenario will cause a significant overall difference in the required hardware by the time it will be required.
 
 \section{Interactive reduction}
 \section{Script-based reduction}
