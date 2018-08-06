@@ -1,11 +1,7 @@
 from astropy import units as u
+from math import sqrt
 
 from performance_model import PerformanceModel
-
-def memory_requirement(num_pixel, num_event):
-    #TODO this is just a single workspace, should we put a factor to have multiple?
-    num_bin = 1000 # reasonable generic estimate?
-    return num_pixel * num_bin * 3 * 8 * u.byte + num_event * 2 * 8 * u.byte
 
 class InstrumentParams:
     def __init__(self, num_pixel, event_rate, run_duration, num_bin, max_rate_compensation=1):
@@ -24,14 +20,8 @@ class Instrument:
     def required_resources(self, reduction_duration):
         model = PerformanceModel()
         num_event = self.params.run_duration*self.params.event_rate
-        for cores in [ 2**i for i in range(12) ]:
+        for cores in [ round(sqrt(2)**i) for i in range(19) ]:
             actual_duration = model.seconds(cores, self.params.num_pixel, self.params.run_duration*self.params.event_rate, self.params.num_bin)
             if actual_duration < reduction_duration:
-                return {'actual_duration':actual_duration, 'cores':cores, 'cpu_time':cores*actual_duration, 'size_on_disk':num_event*12*u.byte, 'memory_per_core':memory_requirement(self.params.num_pixel, num_event)/cores}
-        return {'actual_duration':0*u.second, 'cores':'inf', 'cpu_time':'inf', 'size_on_disk':num_event*12*u.byte, 'memory_per_core':0}
-
-    # figures of interest:
-    # - number of cores for given reduction duration
-    # - number of CPU seconds (minimal and for given run duration?)
-
-    # normalization runs may be read / reduced multiple times, currently this is not taken into account (underestimating ressource requirements)
+                return {'actual_duration':actual_duration, 'cores':cores, 'cpu_time':cores*actual_duration, 'size_on_disk':num_event*12*u.byte}
+        return {'actual_duration':actual_duration, 'cores':cores, 'cpu_time':cores*actual_duration, 'size_on_disk':num_event*12*u.byte}
