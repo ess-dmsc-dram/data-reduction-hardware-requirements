@@ -49,7 +49,7 @@ configs['ESTIA'] = {
     'rate':[1e8, 4e6, 2e6, 8e5, 8e5],
     'count':[1e9, 1e9, 1e7, 1e7, 1e9],
     'num_bin':[450, 450, 450, 450, 450],
-    'use':[0.01, 0.001, 0.05, 0.5, 0.5]}
+    'use':[0.001, 0.01, 0.05, 0.5, 0.5]}
 
 configs['CSPEC'] = {
     'phases':[400000,750000],
@@ -78,7 +78,7 @@ configs['DREAM'] = {
 
 configs['BEER'] = {
     'phases':[200000,400000],
-    'name':['medium-resolution', 'medium-resolution-multiplexing', 'high-flux-multiplexing'],
+    'name':['medium-flux', 'medium-flux-multiplexing', 'high-flux-multiplexing'],
     'rate':[3e5, 2e6, 5e7],
     'count':[1e6, 1e6, 1e6], # same run but scanning the sample volume quickly? TODO is this realistic?
     'num_bin':[2000, 2000, 8500],

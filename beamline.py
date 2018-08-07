@@ -28,7 +28,7 @@ class Beamline:
         self.configs.append((name, use_fraction, event_rate, event_count, num_bin))
 
     def run(self, accelerator_power, speedup):
-        latex = LatexTabular(len(self.configs))
+        latex = LatexTabular(len(self.configs), speedup)
         for phase_id, phase in enumerate(self.phases):
             assert phase <= self.phases[-1] # phases must be ordered, highest pixel count last
             latex.set_pixel_count(phase)

@@ -2,7 +2,7 @@
 
 \usepackage[utf8x]{inputenc}
 \usepackage{graphicx}
-\usepackage{color}
+\usepackage{xcolor}
 \usepackage{amssymb,amsmath}
 \usepackage{enumitem}
 \PassOptionsToPackage{hyphens}{url}\usepackage{bookmark,hyperref}
@@ -51,6 +51,7 @@
 \newcommand{\magic}{MAGIC\xspace}
 \newcommand{\odin}{ODIN\xspace}
 
+\newcommand{\mantid}{Mantid\xspace}
 \newcommand{\nexus}{NeXus\xspace}
 
 \begin{document}
@@ -65,6 +66,8 @@
 
 effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
 discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
+
+table with parameters used to generate HW tables.
 
 \section{Introduction}
 
@@ -112,6 +115,7 @@ Benchmarks indicate that the contribution of this is to the overall runtime is l
 
 
 \section{Scaling analysis}
+\label{sec:scaling-analysis}
 
 The number of cores required for reduction depends on the required maximum runtime for a reduction.
 It is unclear what a good limit for the runtime $\Treduction$ is.
@@ -407,11 +411,26 @@ Thus simply adding the required 5 sessions to the required numbers for data anal
 list of benchmark runs/results and considered instrument
 example tables of required hardware (for some set of parameters)
 
+cap on Ncore: 512 (if we get something hire it usually indicates that something is wrong, i.e., special combination of parameters in conflic with our generic performance requirements).
+
+color-code lines that do violate conditions?
+
 \begin{table}
   \scriptsize
   \input{../BEER.tex}
   \caption{\label{tab:hardware-beer}
-\beer.
+Example estimate of hardware required for script-based reduction for \beer.
+In this and the following tables, the `Pixels' column refers to the build-out phase.
+`Use' is (usually) a guess of the fraction a particular instrument mode/configuration is used.
+The values are chosen to add up to 100\% but could be adjusted to take into account time without beam and time for changing samples.
+If the obtainable $\Treduction$ violates the conditions such as a $5\times$ speedup stated in Sec.~\ref{sec:scaling-analysis} the corresponding $\Trun$ in the table is highlighted in \textcolor{red}{red}.\\
+The biggest uncertainty comes from the duration of a single run.
+The measurement time for each individual measurement point in the sample can be very low.
+If each such point is considered as an independent measurement we obtain a high hardware cost, especially in \emph{high-flux-multiplexing} mode.
+If a combined treatment of the sample scan is possible the requirement is likely to be much lower in the high-flux case.
+For the \emph{high-flux-multiplexing} mode $\Trun$ looks unrealistic (below the pulse length), yielding an enormous core count.
+The rate given by the instrument team for this mode is two orders of magnitude above the stated average rate so our naive computation of $\Trun$ may not correspond to the actual use case, i.e., the result should be interpreted with care.
+For the \emph{medium-flux-multiplexing} mode we do not have an actual statement of the event rate but we have chosen to include it as an estimate for an intermediate case.
 }
 \end{table}
 
@@ -419,7 +438,10 @@ example tables of required hardware (for some set of parameters)
   \footnotesize
   \input{../BIFROST.tex}
   \caption{\label{tab:hardware-bifrost}
-\bifrost.
+Example estimate of hardware required for script-based reduction for \bifrost.
+The pixel count for \bifrost is very low, yielding a comparatively low hardware requirement.
+However, the detector bank is scanned and data from multiple positions is to be included in the same reduction and analysis.
+This is likely connected with an overhead which has not been included here.
 }
 \end{table}
 
@@ -427,7 +449,9 @@ example tables of required hardware (for some set of parameters)
   \footnotesize
   \input{../CSPEC.tex}
   \caption{\label{tab:hardware-cspec}
-\cspec.
+Example estimate of hardware required for script-based reduction for \cspec.
+We assume that combining data from multiple runs (rotations) is \emph{not} part of data reduction and is handled by the analysis software.
+If the transformation to $(\vec Q, \Delta E)$ and subsequent summation were to be done in \mantid the hardware requirement would increase significantly.
 }
 \end{table}
 
@@ -435,7 +459,10 @@ example tables of required hardware (for some set of parameters)
   \footnotesize
   \input{../DREAM.tex}
   \caption{\label{tab:hardware-dream}
-\dream.
+Example estimate of hardware required for script-based reduction for \dream.
+Not considering 
+few events per pixel, is our estimate good? overhead from eventlist?
+TODO get better estimate on run duration before writing interpretiona. may get worse if there are fewer events per run than currently estimated
 }
 \end{table}
 
@@ -443,7 +470,10 @@ example tables of required hardware (for some set of parameters)
   \scriptsize
   \input{../ESTIA.tex}
   \caption{\label{tab:hardware-estia}
-\estia.
+Example estimate of hardware required for script-based reduction for \estia.
+The average required core count is low.
+With exception of the reference measurements in \emph{high-intensity} mode the required hardware the peak core count is also low.
+The peak core count can be reduced by accepting a longer reduction time for the reference measurements, which are infrequent and only of short duration.
 }
 \end{table}
 
@@ -451,7 +481,8 @@ example tables of required hardware (for some set of parameters)
   \scriptsize
   \input{../LoKI.tex}
   \caption{\label{tab:hardware-loki}
-\loki.
+Example estimate of hardware required for script-based reduction for \loki.
+Peak as well as average core count requirements are low.
 }
 \end{table}
 
@@ -459,7 +490,10 @@ example tables of required hardware (for some set of parameters)
   \footnotesize
   \input{../MAGIC.tex}
   \caption{\label{tab:hardware-magic}
-\magic.
+Example estimate of hardware required for script-based reduction for \magic.
+The numbers given here are very high --- and most likely unrealistic --- due to a combination of a high pixel count and a low event count per sample rotation angle, with only $10^5$ to $5\times10^5$ events per rotation angle quoted by the instrument scientists.
+Assuming that each rotation is treated independently results in the figures given here.
+Probably this is not a good assumption and a joint treatment of sample rotation angles needs to be considered instead.
 }
 \end{table}
 
