@@ -24,7 +24,7 @@ class Beamline:
     def add_phase(self, num_pixel):
         self.phases.append(num_pixel)
 
-    def add_config(self, name, use_fraction, event_rate, event_count, num_bin=5000):
+    def add_config(self, name, use_fraction, event_rate, event_count, num_bin):
         self.configs.append((name, use_fraction, event_rate, event_count, num_bin))
 
     def run(self, accelerator_power, speedup):

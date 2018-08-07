@@ -36,11 +36,13 @@
 \newcommand{\Tevent}{t_{\text{event}}}
 \newcommand{\Nbin}{N_{\text{bin}}}
 \newcommand{\Ncore}{N_{\text{core}}}
+\newcommand{\Ncoremean}{\langle N_{\text{core}}\rangle}
 \newcommand{\Nevent}{N_{\text{event}}}
 \newcommand{\Nreduction}{N_{\text{reduction}}}
 \newcommand{\Nspec}{N_{\text{spec}}}
 \newcommand{\Bmax}{B_{\text{max}}}
 \newcommand{\Fevent}{f_{\text{event}}}
+\newcommand{\Mcore}{M_{\text{core}}}
 
 \newcommand{\beer}{BEER\xspace}
 \newcommand{\bifrost}{BIFROST\xspace}
@@ -56,8 +58,8 @@
 
 \begin{document}
 
-\title{Estimation of hardware requirements for data reduction with Mantid at ESS}
-\author{Simon Heybrock, Lamar Moore, Neil Vaytet\\
+\title{Estimation of hardware requirements for data reduction with \mantid at ESS}
+\author{Simon Heybrock\\
     {\small\href{mailto:simon.heybrock@esss.se}{\nolinkurl{simon.heybrock@esss.se}}}}
 
 \maketitle
@@ -67,21 +69,22 @@
 effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
 discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
 
-table with parameters used to generate HW tables.
+table of generated data volumes?
+discuss after hw tables whether/what we really cannot rely on users laptops
 
 \section{Introduction}
 
-The aim of this document is to capture our understanding of what hardware resources will be required for reducing data with Mantid for ESS.
+The aim of this document is to capture our understanding of what hardware resources will be required for reducing data with \mantid for ESS.
 While we attempt to give some estimates for, e.g., required core counts, it will become clear below there are too many uncertainties. In practice the main contribution of this document may thus be the description of how various parameters affect what hardware is required, allowing us the continuously update and improve our estimates.
 
 Data reduction covers three main cases, live reduction, interactive reduction, and script-based reduction.
 
 \paragraph{Live reduction}
-Preliminary/simplified on-the-fly reduction of data and visualization is a key promise of ESS and will be required for all instruments, any time the beam is on and at times probably also with beam off for other calibration work.
+Preliminary/simplified on-the-fly reduction of data and visualization is a key promise of ESS and will be required for all instruments, any time the beam is on, and at times also with beam off for other calibration work.
 It is critical that this is available at all times so a dedicated pool of hardware may be required.
 
 \paragraph{Interactive reduction} 
-The general view is that data at ESS will be so large that users cannot do data reduction on their laptop or desktop PC. Therefore DMSC needs to provide resources for all interactive workflows using the Mantid GUI (MantidPlot or its successor) for data reduction and visualization.
+The general view is that data at ESS will be so large that users cannot do data reduction on their laptop or desktop PC. Therefore DMSC needs to provide resources for all interactive workflows using the \mantid GUI (MantidPlot or its successor) for data reduction and visualization.
 This is required during a user visit as well as a certain time period after the experiment.
 Furthermore, we need to provide access to such resources \emph{before} an experiment such that users can familiarize themselves with the tools and provided software infrastructure, avoiding wasting beam time due to software problems.
 For interactive reduction, due to the interactive nature, high CPU use will alternate with shorter or longer idle breaks.
@@ -93,37 +96,33 @@ This covers automatic reduction and batch reduction.
 This is suitable for being run on a cluster using a standard queuing system with adequate means to ensure that queue lengths stay within limits.
 For example, one could imagine that jobs for data reduction of a running experiment need to be prioritized over modelling jobs of a experiment that happened a long time ago.
 
-\subsection{Threading and MPI support}
-\label{sec:threading-and-mpi-support}
-
-The Mantid framework is multithreaded and algorithms run by a script or interactively by the GUI will typically run with multiple threads.
-To allow for scaling data reduction beyond a single node MPI support has been added to Mantid.
-MPI support is only available for script-based reduction.
-In principle it could also be used for live reduction, provided that it is only a passive way to observe raw and reduced data.
-There is no MPI support connected to the GUI and there are no plans for this either.\footnote{That is, there will be no equivalent to the client-server MPI mode supported by, e.g., ParaView}.
-
-In various benchmarks we observed that generally an equivalent threaded run of a Mantid reduction script takes longer than the same reduction done with MPI:\footnote{This is true even without the optimized MPI-based NeXus loader.}
-The scaling with the number of used cores is worse.
-The reason for this is not fully understood but it is probably related to the fork-join threading approach.
-Thus we cannot directly transfer results and scaling behaviors obtained for MPI to a threaded version of Mantid.
-For machines with a moderate number of cores of up to roughly 10 cores we can probably use the rule of thumb that the threaded reduction will be $2\times$ slower than the MPI reduction.
-
-\subsection{Event filtering}
-
-Many ESS instruments will require filtering events in one way or another.
-Benchmarks indicate that the contribution of this is to the overall runtime is less than $10\%$, i.e., we do not need to handle it explicitly in our evaluations.
-
-
 \section{Scaling analysis}
 \label{sec:scaling-analysis}
 
-The number of cores required for reduction depends on the required maximum runtime for a reduction.
+\subsection{Threading and MPI support}
+\label{sec:threading-and-mpi-support}
+
+The \mantid framework is multithreaded and algorithms run by a script or interactively by the GUI will typically run with multiple threads.
+To allow for scaling data reduction beyond a single node, MPI support has been added to \mantid.
+MPI support is only available for script-based reduction.
+In principle it could also be used for live reduction, provided that it is only a passive way to observe raw and reduced data.
+There is no MPI support connected to the GUI and there are no plans for this either.\footnote{That is, there will be no equivalent to the client-server MPI mode supported by, e.g., ParaView.}.
+
+In various benchmarks we observed that generally an equivalent threaded run of a \mantid reduction script takes longer than the same reduction done with MPI:\footnote{This is true even without the optimized MPI-based NeXus loader.}
+The scaling with the number of used cores is worse.
+The reason for this is not fully understood but it is probably related to the fork-join threading approach.
+Thus we cannot directly transfer results and scaling behaviors obtained for MPI to a threaded version of \mantid.
+For machines with a moderate number of cores of up to roughly 10 cores we can probably use the rule of thumb that the threaded reduction will be $2\times$ slower than the MPI reduction.
+
+\subsection{Master equation}
+
+The number of cores required for MPI reduction depends on the required maximum runtime for a reduction.
 It is unclear what a good limit for the runtime $\Treduction$ is.
 For now we define:
 
 \begin{itemize}
   \item The reduction should be $5\times$ faster than the experiment.
-  \item To ensure that long-running experiments with low event rates are processed quickly we require that a minimum of $2\cdot10^6$ events/s are processed. TODO this does not really work and runs into trouble for instruments with many pixels, need a better definition.
+  \item To ensure that long-running experiments with low event rates are processed quickly we require that a minimum of $2\cdot10^6$ events/s are processed.
   \item We never require a runtime below 30 seconds.
 \end{itemize}
 A visualization of these requirements is given in Fig.~\ref{fig:reduction-time-requirement}.
@@ -131,7 +130,7 @@ A visualization of these requirements is given in Fig.~\ref{fig:reduction-time-r
 \begin{figure}
   \centering
 \includegraphics[height=0.33\textheight]{reduction-time-requirement.pdf}
-\caption{\label{fig:reduction-time-requirement}Imposed requirements for the maximum reduction time. The checked areas indicate regions that are unreachable due to the defined limits. For runs that are short relative to the event rate we are governed by the 30-second limit. Above that limit, at low event rates the required reduction duration is low compared to the run duration. With increasing event rate we get closer to the limit of $5\times$ speedup indicated by the bold red line.}
+\caption{\label{fig:reduction-time-requirement}Imposed requirements for the maximum reduction time. The checked areas indicate regions that are forbidden by the defined limits. For runs that are short relative to the event rate we are governed by the 30-second limit. Above that limit, at low event rates the required reduction duration is low compared to the run duration. With increasing event rate we get closer to the limit of $5\times$ speedup indicated by the bold red line.}
 \end{figure}
 
 With a couple of approximations (which are probably minor for this purpose and compared to other sources of uncertainty) we can describe the time required to reduce a set of data as
@@ -142,13 +141,13 @@ With a couple of approximations (which are probably minor for this purpose and c
 \end{align}
 where
 \begin{itemize}
-  \item $\Nbin$ is the number of bins in the workflow, i.e., the number of spectra $\Nspec$ multiplied by the number of bins per spectrum.\footnote{Typically $\Nspec$ is the number of pixels of the instrument, but it can be different, e.g., when data from pixels is split up, such as for event filtering or RRM.}
+  \item $\Nbin$ is the number of bins in the workflow, i.e., the number of spectra $\Nspec$ multiplied by the number of bins per spectrum.\footnote{Typically $\Nspec$ is the number of pixels of the instrument, but it can be different, e.g., when multiple adjacent pixels are grouped due to a lower resolution requirement or due to potential projects related to volumetric detectors.}
     The number of bins per spectrum depends on the bandwidth and resolution of the instrument.
-    As a rule of thumb, for a given energy resolution $\Delta E$ we require a bin size of $\Delta E/10$.
+    As a rule of thumb, for a given energy resolution $\delta E$ we require a bin size of $\delta E/10$.
   \item $\Nevent$ is the total number of events that are being handled in the reduction workflow.
     This can include events from multiple files, e.g., for a sample run and a background run.
   \item $\Ncore$ is the number of cores (MPI ranks) used in the reduction.
-    We are not considering a hybrid threading+MPI approach (apart from a few specialized algorithms that are using threading internally).
+    We are not considering a hybrid threading+MPI approach.\footnote{A few specialized algorithms are using threading internally, even in an MPI run.}.
   \item $t_0$ is a constant time specific to the reduction workflow.
     It includes anything that does not depend and the number of spectra or number of events.
     Typically this includes small parts of the time spend in every algorithm, time for loading experiment logs from NeXus files, time for loading auxiliary files, and other overheads.
@@ -156,22 +155,22 @@ where
   \item $\Tevent$ is the (computed) time to run the workflow for a single event.
   \item $\Bmax$ is the number of events that can be loaded from the file system per second.
 \end{itemize}
-The equation is motivated by an analysis of benchmark results (see Sec.~\ref{sec:benchmarks}) and the computational structure of data reduction.
+The equation is motivated by an analysis of benchmark results --- see Sec.~\ref{sec:benchmarks} --- and the computational structure of data reduction.
 $\Ncore$ can be adjusted such that $\Treduction$ fulfills the conditions listed above.
 There can be cases where the conditions are violated, e.g., when the event rate is high and $\Bmax$ is too low.
-More details on this equation can be found in App. \ref{app:master_eq}.
+More details on this equation can be found in App.~\ref{app:master_eq}.
 
 Our benchmarks based on existing instruments and investigations of parameters for a series of ESS instruments show that any of the terms in Eq.~\eqref{eq:master} can be relevant or even dominant, depending on the instrument, the experiment, and the number of used cores.
 
 \begin{itemize}
   \item 
-    For instruments that produce many small files (few spectra and events), the $t_0$ term can become dominant.
+    For instruments that produce many small files with few spectra and events, the $t_0$ term can become dominant.
     This can in theory be improved by processing multiple files in the same workflow, but at this point making such an assumption is not justified.
     It is thus important to capture the typical run duration for each instrument.
   \item
     Even if the $t_0$ term is not dominant, a run may contain relatively few events relative to the pixel count.
     In that case the $\Nbin$ term is important.
-    Given that many ESS instruments have a high pixel count this could very well become a dominating factor.\footnote{In many experiments the total number of events required for each measurement may not increase over present-day experiments. However, the ESS event \emph{rate} and pixel counts are higher, so the balance may shift to our disadvantage.}
+    Given that many ESS instruments have a high pixel count this could very well become a dominating factor.\footnote{In many experiments the total number of events required for each measurement may not increase drastically over present-day experiments. However, the ESS event \emph{rate} and pixel counts are often much higher, so the balance may shift to our disadvantage.}
   \item
     For instruments with many events we may be using many cores to offset the reduction cost.
     In that limit the bandwidth-limiting term becomes relevant.
@@ -179,41 +178,64 @@ Our benchmarks based on existing instruments and investigations of parameters fo
 
 Based on the time for reducing a single run we can thus compute the average number of cores required for reducing data for the instrument.
 Note that this does \emph{not} include live reduction and interactive sessions.
+We define
 
 \begin{align}
-  \overline{\Ncore} = \Nreduction \Ncore \frac{\Treduction}{\Trun}.
+  \Ncoremean = p_{\text{use}}\Nreduction \Ncore \frac{\Treduction}{\Trun},
 \end{align}
-
-Here:
+where
 
 \begin{itemize}
+  \item $p_{\text{use}}$ is the probability that the instrument is in use in a specific operating mode.
+  Typically there are multiple operating modes for an instrument so there will be multiple $\Ncoremean$ values that need to be be summed.
   \item $\Nreduction$ is the number of times data is reduced.
     Typically this should be small, e.g., 1, 2, or 3, but especially in the early days there will be exceptions.
   \item $\Trun$ is the duration of a single run.
 \end{itemize}
-
 For convenience, we can expand the master equation and obtain
 
 %TODO include factor for use-fraction and use same symbol when generating tables
 \begin{align}
-  \overline{\Ncore} &= \frac{\Nreduction}{\Trun}\left[\Ncore \left(t_0 + \frac{\Nevent}{\Bmax}\right) + \Nbin\Tbin + \Nevent\Tevent\right]\\
+  \Ncoremean &= \frac{\Nreduction}{\Trun}\left[\Ncore \left(t_0 + \frac{\Nevent}{\Bmax}\right) + \Nbin\Tbin + \Nevent\Tevent\right]\\
+  \label{eq:master-v2}
    &= \Nreduction\left[\Ncore \left(\frac{t_0}{\Trun} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin}{\Trun} + \Fevent\Tevent\right]\\
    &= \Nreduction\left[\Ncore \left(\frac{t_0\Fevent}{\Nevent} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin\Fevent}{\Nevent} + \Fevent\Tevent\right].
 \end{align}
-All three lines are simple variations of each other and are merely listed to highlight different aspects of the scaling behavior.
+All three lines are trivial variations of each other and are merely listed to highlight different aspects of the scaling behavior.
 
-It is important to note that $\overline{\Ncore}$ depends on $\Ncore$, i.e., the more cores we use, the higher our overall hardware requirement.
-Reasons for using more cores are primarily to (1) reduce the time for a single reduction to something that is acceptable for users, and (2) work around memory limitations on a single node.
-Furthermore, there are two terms that depend on $1/\Trun$, i.e., shorter runs will increase the number of required cores even if all other parameters such as the event rate $\Fevent$ are unchanged.
+It is important to note that $\Ncoremean$ depends on $\Ncore$, i.e., the more cores we use, the higher our overall hardware requirement.
+Reasons for using more cores are primarily (1) to reduce the time for a single reduction to something that is acceptable for users, and (2) to work around memory limitations on a single node.
+There are two terms that depend on $1/\Trun$ (see Eq.~\eqref{eq:master-v2}), i.e., shorter runs will increase the number of required cores even if all other parameters such as the event rate $\Fevent$ are unchanged.
+
+\subsection{Event filtering}
+
+The discussion in this section is based on event filtering benchmarks conducted by Neil Vaytet.
+See the reference given in App.~\ref{app:refs} for details.
+Many ESS instruments will require filtering events in one way or another.
+Benchmarks indicate that the contribution to the overall runtime is less than $10\%$, i.e., we do not need to handle it explicitly in our evaluations.
+While the cost filtering itself is not significant, in many cases we are dealing with many more workspaces after the filtering process, e.g., one for every temperature interval in a temperature scan.
+If the majority of data reduction can be done \emph{before} filtering this is not a problem.
+However, if a significant portion of data treatment can only happen after the filtering/splitting process the cost is increasing significantly since we are effectively dealing with many distinct runs.
+This problem is probably similar to the case of sample rotation angles discussed later in Tab.~\ref{tab:hardware-magic} for \magic and needs to be investigated closer in the future.
 
 \section{Input parameters}
 
+\subsection{Ramp-up in hot commissioning and early operations}
+
+The initial rates and pixel counts will be lower than the design values due to the ramp-up of accelerator power as well as incomplete detctor coverage.
 In Fig.~\ref{fig:accelerator-power} we show the estimate for the accelerator power ramp-up used in the following for scaling the expected event rates.
+ESS instrument scientists expect a linear scaling of the useable wavelength with the accelerator power.
+In Tab.~\ref{tab:pixel-counts} we list the pixel counts for the first instruments, i.e., effectively $\Nspec$.
+We do not list the imaging beamline \odin.
+It is not suitable for joint estimation with the other beamlines and it reduction hardware requirements should probably be considered jointly with its requirements for reconstruction and analysis.
+To obtain $\Nbin$ we need to combine $\Nspec$ with the number of bins per spectrum.
+This depends on the resolution of the instrument, which can be configurable.
+Details for this and other parameters are listed in Sec.~\ref{sec:script-based}.
 
 \begin{figure}
   \centering
 \includegraphics[height=0.33\textheight]{accelerator-power.pdf}
-\caption{\label{fig:accelerator-power}Estimate of accelerator power ramp up. ESS instrument scientists expect a linear scaling of the useable wavelength with the accelerator power.}
+\caption{\label{fig:accelerator-power}Estimate of accelerator power ramp up.}
 \end{figure}
 
 \begin{table}
@@ -229,43 +251,23 @@ In Fig.~\ref{fig:accelerator-power} we show the estimate for the accelerator pow
     \estia & 250k & 500k \\
     \loki & 750k & 1500k \\
     \magic & 1440k & 2880k \\
-    \odin & ? & ? & imaging is special case, handle separately?\\
   \end{tabular}
-  \caption{\label{tab:pixel-counts}Pixel counts for the first eight instruments. Generally instruments to not have full detector coverage at day 1 and will add more pixels in an upgrade, typically a couple of years later.}
-\end{table}
-
-\begin{table}
-  \centering
-  \begin{tabular}{llrrr}
-    Instrument & Configuration & use fraction & event rate & total event count \\
-    \hline
-    \hline
-    \multirow{6}{*}{\loki}
-    & 3m-high-flux    & 0.1 & $1.0\cdot10^7$ & $10^8$ \\
-    & 3m-small-sample & 0.1 & $3.33\cdot10^5$ & $10^8$ \\
-    & 5m-high-flux    & 0.1 & $1.92\cdot10^6$ & $10^8$ \\
-    & 5m-small-sample & 0.3 & $1.2\cdot10^5$ & $10^8$ \\
-    & 8m-high-flux    & 0.1 & $7.5\cdot10^5$ & $10^8$ \\
-    & 8m-small-sample & 0.3 & $4.69\cdot10^4$ & $10^8$ \\
-    \hline
-    \multirow{5}{*}{\estia} & reference-high-intensity\\ & reference-normal\\ & specular-high-intensity\\ & specular\\ & off-specular\\
-  \end{tabular}
-  \caption{\label{tab:configurations}Instrument configurations with expected event rates at full power and detector build-out.}
+  \caption{\label{tab:pixel-counts}Pixel counts for the first instruments. Generally instruments to not have full detector coverage at day 1 and will add more pixels in an upgrade, typically a couple of years later.}
 \end{table}
 
 
-\section{Baseline benchmarks}
+\subsection{Baseline benchmarks}
 \label{sec:benchmarks}
 
 To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bmax$ in Eq.~\eqref{eq:master} a number of benchmarks have been undertaken.
 
 \begin{enumerate}
-  \item Using an MPI-build of Mantid we measured run times of workflows for SANS, powder diffraction, and direct geometry spectroscopy (using the ISIS workflow for SANS2D, the \verb|SNSPowderDiffraction| workflow for PG3, and the \verb|DgsReduction| workflow for CNCS).
+  \item Using an MPI-build of \mantid we measured run times of workflows for SANS, powder diffraction, and direct geometry spectroscopy (using the ISIS workflow for SANS2D, the \verb|SNSPowderDiffraction| workflow for PG3, and the \verb|DgsReduction| workflow for CNCS).
     We studied the scaling behavior with the number of used cores (MPI ranks), the number of events, and also the number of bins per spectrum.
     By looking at the various limits (few/many cores and few/many events) we can extract an approximation for $t_0$, $\Tbin$, $\Tevent$.
     All these experiments were done on a single node, a dual-socket Xeon E5-2620 v3 running at 2.40GHz.
   \item Scaling beyond a single node has been established in older benchmarks in 2015, again using the \verb|SNSPowderDiffraction|.
-    This benchmark showed that scaling beyond a single node does not lead to any significant slowdown and scaling works well up to a high number of MPI ranks.
+    This benchmark showed that scaling beyond a single node does not lead to any significant slowdown and scaling works well up to a high number of MPI ranks, with the exception of algorithms loading or saving files.
   \item For the special case of I/O we rely on benchmarks for the recently optimized parallel event loader for \nexus files.
     Currently only benchmarks with a local SSD are available and show scaling up to nearly $10^8$ loaded events per second (slightly lower for compressed files) with 10 used cores.
     Benchmarks with a parallel file system are pending.
@@ -280,14 +282,6 @@ The experiments show a surprisingly consistent pattern, independent of the techn
 \end{itemize}
 
 
-\section{Results}
-
-Example core counts as well as average core counts are given in Tab.~\ref{}.
-Provided that the compute cluster is hard enough summing the average core counts could yield the required size of the compute cluster.
-However, there are clearly cases with high peak-core requirements.
-Furthermore, in the early days with few operating instruments and a smaller cluster it needs to be ensured that an appropriate partition is always available within a to be defined time frame.
-Determining the resulting required size of the compute cluster is beyond the scope of this investigation.
-
 \subsection{Other factors}
 
 With low accelerator power and lower detector coverage in the early it is to be expected that the type of experiments will be different from what is envisioned for full power.
@@ -299,15 +293,17 @@ Ensuring that the compute cluster size ramp up is sufficiently ahead of the acce
 
 \section{Live reduction}
 
-In Tab.~\ref{tab:consumption-rate} we show benchmark results for the event consumption rate of the Kafka event listener in Mantid without processing or visualization).
-This test is done using a default (non-MPI) build of Mantid.
+The discussion in this section is based on live reduction benchmarks conducted by Lamar Moore.
+See the reference given in App.~\ref{app:refs} for details.
+In Tab.~\ref{tab:consumption-rate} we show benchmark results for the event consumption rate of the Kafka event listener in \mantid without processing or visualization.
+This test is done using a default (non-MPI) build of \mantid.
 MPI support for the Kafka listener is not implemented currently.
 
 With the exception of the SANS2D data point at $10^5$ the scaling with the event rate is linear.\footnote{It is likely that for the high rate of more than 1000 frames per second other effects become relevant. Since we are not interested in such high frame rates we ignore this data point and assume linear scaling.}
 The benchmarks also show a (very approximately) linear scaling of the consumption rate with the number of pixels.
 This is not entirely expected.
 There are two aspects that can be used to explain the scaling:
-With more pixels that write behavior to the \verb|EventWorkspace| becomes more random leading to a less and less efficient use of cache and the rest of the memory subsystem.
+With more pixels the write behavior to the \verb|EventWorkspace| becomes more random leading to a less and less efficient use of cache and the rest of the memory subsystem.
 This effect should be expected to reach a steady state above a certain number of pixels.
 In addition to that, a separate vector needs to be allocated for every pixel to store the events.
 This allocation cost could grow linearly with the pixel count.
@@ -354,16 +350,16 @@ The imaging beamline \odin is a special case and has thus also been excluded fro
 \end{figure}
 
 There is another aspect that we have not covered yet.
-For experiments with very high throughput, i.e., quick changes of sample or sample-environment parameters, we would require additional complexity in the live reduction.
-This could include more advanced filtering, display and comparison of multiple results at the same time, and overhead from frequent transitions to a new run.
+For experiments with very high throughput, i.e., quick changes of sample or sample-environment parameters, we have to deal with additional complexity in the live reduction workflow.
+This could include more advanced filtering, display and comparison of multiple results at the same time,\footnote{e.g., waterfall plots} and overhead from frequent transitions to a new run.
 We have not yet started development of these features so benchmarks are not available.
-That being said, high throughput experiments are not likely to required in the early days.
+That being said, high throughput experiments are not likely to be required in the early days.
 Furthermore, UX is likely to be a bigger issue than performance in this case.
-We consider it unlikely that this scenario will cause a significant overall difference in the required hardware by the time it will be required.
+We consider it unlikely that this scenario will cause a significant overall difference in the required hardware.
 
 \section{Interactive reduction}
 
-As discussed in Sec.~\ref{sec:threading-and-mpi-support} there is not MPI support for the GUI or interactive reduction in general and therefore the is limit scaling the number of available cores.
+As discussed in Sec.~\ref{sec:threading-and-mpi-support} there is no MPI support for the GUI or interactive reduction in general and therefore there is limit scaling with the number of available cores.
 Generally we do not expect good scaling far beyond 10 cores.
 For reductions that are too slow in that case there are several options that can be used in practice:
 \begin{itemize}
@@ -403,10 +399,91 @@ Approximate total RAM requirement for data reduction.
 
 Instrument scientist expect that typically 5 interactive sessions would be required per instrument at any given time.
 This figure is to be combined with requirements for data analysis since typically the interactive sessions would be used for both, data reduction and data analysis.
-For data reduction, a lot of the time Mantid will actually be idle or unused.
+For data reduction, a lot of the time \mantid will actually be idle or unused.
 Thus simply adding the required 5 sessions to the required numbers for data analysis is likely to overestimate the required resources.
 
 \section{Script-based reduction}
+\label{sec:script-based}
+
+We adopt a simplified model to estimate the amount of required main memory.
+We define
+
+\begin{align}
+  \label{eq:ram}
+  M &\equiv \Ncore(1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte}) + N_{\text{workspace}}(24\Nbin + 16\Nevent)~\mathrm{Byte},\\
+  \Mcore &\equiv \frac{M}{\Ncore} = 1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte} + \frac{N_{\text{workspace}}}{\Ncore}(24\Nbin + 16\Nevent)~\mathrm{Byte}.
+\end{align}
+with
+\begin{itemize}
+  \item $1~\mathrm{GByte}$ base memory per core.
+  \item $256~\mathrm{Byte}$ of memory per pixel per core to represent the instrument geometry.
+    This is assumed to be shared between workspaces.
+  \item $24~\mathrm{Byte}$ per bin per workspace for double-precision X, Y, and E.
+  \item $16~\mathrm{Byte}$ per event per workspace for double-precision time-of-flight and pulse-time.
+\end{itemize}
+
+\ref{tab:hardware-estimation-parameters}.
+We list resolution options and the resulting bin counts in Tab.~\ref{tab:resolution}.
+
+
+\begin{table}
+  \centering
+  \begin{tabular}{lrp{8cm}}
+    Parameter & Value & Comment\\
+    \hline
+    $t_0$ & $10~\mathrm{s}$ \\
+    $\Tbin$ & $2\times10^{-7}~\mathrm{s}$ \\
+    $\Tevent$ & $10^{-6}~\mathrm{s}$ \\
+    $\Bmax$ & $10^8~\mathrm{s}^{-1}$ \\
+    scale factor for $\Nevent$ & 2 & to approximate cost from need to reduce sample \emph{and} background for every sample run TODO above we state the Nevent includes this, this is just internal based on count required for sample run (need it if we give that in a table?) \\
+    $\Nreduction$ & 2 \\
+    \hline
+  \end{tabular}
+  \caption{\label{tab:hardware-estimation-parameters}
+  List of parameters used to generate Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic}.
+  See also Eq.~\eqref{eq:ram} regarding memory requirements and related parameters.
+}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{llrl}
+    Instrument & Mode & Bins per spectrum & Comment \\
+    \hline
+    \hline
+    \multirow{2}{*}{\beer}
+    & medium-flux & 2000 \\
+    & high-flux & 8500 \\
+    \hline
+    \multirow{1}{*}{\bifrost}
+    & average & 850\\
+    & high-flux & 110 & is highest flux always lowest resolution?\\
+    \hline
+    \multirow{1}{*}{\cspec}
+    & (all) & 1000 & no large resolution variation possible? \\
+    \hline
+    \multirow{3}{*}{\dream}
+    & high-resolution & 71000 \\
+    & medium & 10000 \\
+    & high-intensity & 1420 \\
+    \hline
+    \multirow{1}{*}{\estia}
+    & (all) & 450 \\
+    \hline
+    \multirow{1}{*}{\loki}
+    & (all)    & 240 \\
+    \hline
+    \multirow{1}{*}{\magic}
+    & (all) & 7100 \\
+    \hline
+  \end{tabular}
+  \caption{\label{tab:resolution}
+List of bin counts used to generate Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic}.
+Bin counts have been estimated based on instrument proposals and input from instrument scientists.
+Details can be found in App.~\ref{app:instrument-parameters}.
+}
+\end{table}
+
 
 list of benchmark runs/results and considered instrument
 example tables of required hardware (for some set of parameters)
@@ -497,6 +574,11 @@ Probably this is not a good assumption and a joint treatment of sample rotation 
 }
 \end{table}
 
+Provided that the compute cluster is large enough summing all $\Ncoremean$ for all relevant instrument could yield the required size of the compute cluster.
+However, there are clearly cases with high peak-core requirements.
+Furthermore, in the early days with few operating instruments and a smaller cluster it needs to be ensured that an appropriate partition is always available within a to be defined time frame.
+Determining the resulting required size of the compute cluster is beyond the scope of this investigation.
+
 appendix: usage instructions for scripts
 
 \section{Hardware components}
@@ -511,10 +593,10 @@ Typically faster RAM is more important than more cores (detailed benchmarks pend
 
 \subsection{Network}
 
-For data reduction, Mantid does not put particularly high demands on the interconnect between nodes.
+For data reduction, \mantid does not put particularly high demands on the interconnect between nodes.
 The most important factor is the speed of the connection to the file system.
 During file system reads and writes there will also be significant communication between nodes.
-Non-I/O algorithms in Mantid typically have either no communication or communication with only moderate latency and bandwidth requirements.
+Non-I/O algorithms in \mantid typically have either no communication or communication with only moderate latency and bandwidth requirements.
 While Ethernet is not sufficient, our current feeling is that any Infiniband network is, even if it is an older revision.
 
 \subsection{Disk I/O}
@@ -530,6 +612,7 @@ effect of I/O bandwidth, in particular limits on reduction speed.
 \appendix
 
 \section{Related documentation}
+\label{app:refs}
 
 \begin{itemize}
   \item Repository containing scripts to produce data in this document as well as the source for this document:\\
@@ -538,9 +621,9 @@ effect of I/O bandwidth, in particular limits on reduction speed.
     \url{https://github.com/DMSC-Instrument-Data/documents/blob/master/mantid/hardware-requirements/plan.md}
   \item Notes from meetings with instrument responsibles:\\
     \url{https://confluence.esss.lu.se/display/DAM/Data+Reduction}
-  \item Benchmarks for live reduction:\\
+  \item Benchmarks for live reduction (Lamar Moore):\\
     \url{https://github.com/DMSC-Instrument-Data/documents/blob/master/investigations/Live%20Reduction/LiveReductionInvestigation.md}
-  \item Benchmarks for event filtering:\\
+  \item Benchmarks for event filtering (Neil Vaytet):\\
     \url{https://github.com/DMSC-Instrument-Data/data-reduction-hardware-requirements/blob/master/benchmarks/nvaytet/summary.md}
   \item \odin data rate report:\\
     \url{https://confluence.esss.lu.se/download/attachments/274116159/report_ODIN_data_rate_volume.pdf?api=v2}
@@ -554,7 +637,7 @@ The rationale for Eq.~\eqref{eq:master} is as follows:
 \begin{itemize}
   \item For the vast majority of algorithms used in data reduction, all spectra are treated independently.
   Thus there is a linear term in $\Nspec$ or $\Nbin$, but no higher order terms, and there is perfect scaling with $\Ncore$.
-\item Events in Mantid are stored with their respective spectrum.
+\item Events in \mantid are stored with their respective spectrum.
   Strictly speaking, we should thus include a term
   \begin{align}
     \Treduction^{\text{nonlinear}} &= \sum_{i=1}^{\Nspec} (N_{event,i} t_{event,linear} + N_{event,i} log N_{event,i} \Tevent^{\text{NlogN}} + ...),
@@ -585,6 +668,31 @@ The rationale for Eq.~\eqref{eq:master} is as follows:
 \end{itemize}
 
 \section{Instrument parameters}
+\label{app:instrument-parameters}
+
+\subsection{\beer}
+
+\begin{itemize}
+  \item According to the original proposal, resolution settings range from 0.1\% to 1\%.
+    The wavelength band is $1.7~\angstrom$ but there are chopper settings to double it using pulse skipping.
+    For a wavelength band centered at $2~\angstrom$ this yields bins counts of $10\times1.7~\angstrom/(0.01\cdot2~\angstrom) = 850$ for the low resolution setting and $10\times1.7~\angstrom/(0.001\cdot2~\angstrom) = 8500$ for the highest resolution.
+\end{itemize}
+
+\subsection{\bifrost}
+
+\begin{itemize}
+  \item According to the original proposal, resolution settings range from 1\% to 4\%.
+  \item The wavelength band is $1.7~\angstrom$.
+    In the most extreme case of 1\% resolution for a central wavelength of $2~\angstrom$ this yields approximately $10\times1.7~\angstrom/(0.01\cdot2.0~\angstrom) = 850$.
+    At $4~\angstrom$ with 4\% resolution we obtain $10\times1.7~\angstrom/(0.02\cdot4.0~\angstrom) = 110$.
+\end{itemize}
+
+\subsection{\dream}
+
+\begin{itemize}
+  \item The (useful) range of the pulse shaping is $10~\mathrm{\mu s}$ to $500~\mathrm{\mu s}$.
+    We thus obtain $10\times71~\mathrm{ms}/10~\mathrm{\mu s} = 71000$ bins for the highest resolution and $10\times71~\mathrm{ms}/500~\mathrm{\mu s} = 1420$ for the lowest resolution.
+\end{itemize}
 
 \subsection{\estia}
 
@@ -595,24 +703,18 @@ From the original proposal:
     In the simplest case with constant bin width this yields $10\times(9.4-5.0)/(0.02\cdot5.0) = 450$ bins, where the factor of 10 is the aforementioned rule of thumb to obtain a required bin count from a resolution.
 \end{itemize}
 
+\subsection{\loki}
+
+\begin{itemize}
+  \item Resolution is dominated by the pulse length.
+    We thus obtain an approximate bin count of  $10\times71~\mathrm{ms}/3~\mathrm{ms} = 240$.
+\end{itemize}
+
 \subsection{\magic}
 
 \begin{itemize}
   \item The shortest pulse from the pulse-shaping chopper is $100~\mathrm{\mu s}$ yielding $10\times71~\mathrm{ms}/100~\mathrm{\mu s} = 7100$ bins, where $71~\mathrm{ms}$ is the time to the next pulse.
     While there is a high-flux option, my understanding is that this depends on collimation while the pulse-shaping is unchanged, i.e., we always have this pulse length.
-\end{itemize}
-
-\subsection{\dream}
-
-\begin{itemize}
-  \item The (useful) range of the pulse shaping is $10~\mathrm{\mu s}$ to $500~\mathrm{\mu s}$.
-    We thus obtain $10\times71~\mathrm{ms}/10~\mathrm{\mu s} = 71000$ bins for the highest resolution and $10\times71~\mathrm{ms}/500~\mathrm{\mu s} = 1420$ for the lowest resolution.
-\end{itemize}
-
-\subsection{\beer}
-
-\begin{itemize}
-  \item According to the original proposal, resolution settings range from 0.1\% to 1\%. The wavelength band is $1.7~\angstrom$ but there are chopper settings to double it using pulse skipping. For a wavelength band centered at $2~\angstrom$ this yields bins counts of $10\times1.7~\angstrom/(0.01\cdot2~\angstrom) = 850$ for the low resolution setting and $10\times1.7~\angstrom/(0.001\cdot2~\angstrom) = 8500$ for the highest resolution.
 \end{itemize}
 
 %We list possible and ongoing mitigations in Tab.~\ref{tab:unknown_factors}.

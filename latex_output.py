@@ -1,8 +1,8 @@
 def generate_latex_header():
     header = """\centering
 \\begin{tabular}{rlrrrrrrrrr}
-Pixels & Mode & $p$-beam & Use & $\Fevent$ & $\Trun$ & $\Treduction$ & $\\Ncore$ & $\langle\\Ncore\\rangle$ & RAM\\\\
-& & $[\mathrm{MW}]$ & [\%] & $\mathrm{[s^{-1}]}$ & $\mathrm{[s]}$ & $\mathrm{[s]}$ & & & [GB/core]\\\\
+Pixels & Mode & $p$-beam & Use & $\Fevent$ & $\Trun$ & $\Treduction$ & $\\Ncore$ & $\langle\\Ncore\\rangle$ & $\\Mcore$ \\\\
+& & $[\mathrm{MW}]$ & [\%] & $\mathrm{[s^{-1}]}$ & $\mathrm{[s]}$ & $\mathrm{[s]}$ & & & [GByte]\\\\
 \hline
 """
     return header
