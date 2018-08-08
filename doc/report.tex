@@ -39,6 +39,7 @@
 \newcommand{\Ncoremean}{\langle N_{\text{core}}\rangle}
 \newcommand{\Nevent}{N_{\text{event}}}
 \newcommand{\Nreduction}{N_{\text{reduction}}}
+\newcommand{\Nworkspace}{N_{\text{workspace}}}
 \newcommand{\Nspec}{N_{\text{spec}}}
 \newcommand{\Bmax}{B_{\text{max}}}
 \newcommand{\Fevent}{f_{\text{event}}}
@@ -226,34 +227,43 @@ For reductions that are too slow in that case there are several options that can
   \item Use slow interactive reduction and use different sessions to do something else in the meantime, such as reducing another sample.
 \end{itemize}
 With exception of the second option, there is a minimum amount of required total RAM.
-We give example requirements for various instrument configurations in Tab.~\ref{tab:total-ram}.
+We can attempt to estimate the requirement as
 
-\begin{table}
+\begin{align}
+  \label{eq:ram-interactive}
+  M_{\text{interactive}} &= 2~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte} + N_{\text{workspace}}(24\Nbin + 16\Nevent)~\mathrm{Byte},
+\end{align}
+with
+\begin{itemize}
+  \item $\Nworkspace$ is the number of workspaces present in \mantid at the same time.
+    For interactive reduction this can typically be larger than the absolute minimum required for a fixed script-based reduction.
+    Therefore we use $\Nworkspace = 10$ here, which is higher than what we will require below for script-based reduction in Sec.~\ref{sec:script-based-results}.
+  \item $2~\mathrm{GByte}$ base memory.
+    We assume a larger base requirement than in Sec.~\ref{sec:script-based-results} for GUI requirements.
+  \item $256~\mathrm{Byte}$ of memory per pixel to represent the instrument geometry.
+    This is assumed to be shared between workspaces.
+  \item $24~\mathrm{Byte}$ per bin per workspace for double-precision X, Y, and E.
+  \item $16~\mathrm{Byte}$ per event per workspace for double-precision time-of-flight and pulse-time.
+\end{itemize}
+Considering the projected duration of a single run $\Trun$ for design-power event rates, most experiments seem to use roughly $10^8$ to $10^9$ events.
+Notable exceptions to this are the inelastic beamlines and the single-crystal beamlines, if we consider merging data from all sample rotation angles.
+Traditionally single crystal diffraction and inelastic scattering have the highest memory requirements but it is currently unclear whether this merge step would be done in \mantid.
+
+Based on this equation, we give example requirements for various instrument configurations in Fig.~\ref{fig:interactive-ram}.
+
+\begin{figure}
   \centering
-  \begin{tabular}{lrlr}
-    Instrument & Pixels & Mode & Typical minimum RAM\\
-    \hline
-    \multirow{12}{*}{\loki}
-    & \multirow{6}{*}{750000}
-    & 3m-high-flux    & \\
-    && 3m-small-sample & \\
-    && 5m-high-flux    & \\
-    && 5m-small-sample & \\
-    && 8m-high-flux    & \\
-    && 8m-small-sample & \\\cline{2-4}
-    & \multirow{6}{*}{1500000}
-    & 3m-high-flux    & \\
-    && 3m-small-sample & \\
-    && 5m-high-flux    & \\
-    && 5m-small-sample & \\
-    && 8m-high-flux    & \\
-    && 8m-small-sample & \\
-    \hline
-  \end{tabular}
-  \caption{\label{tab:total-ram}
-Approximate total RAM requirement for data reduction.
+\includegraphics[height=0.33\textheight]{interactive-ram.pdf}
+\caption{\label{fig:interactive-ram}
+Scaling of memory requirements for interactive reduction with the event count per run.
+The plot uses the final pixel count from Tab.~\ref{tab:pixel-counts} and $\Nbin$ based on Tab.~\ref{tab:resolution}.
+The powder and single crystal diffractometers \dream, \magic, and \beer show an exceedingly high memory requirement due to the high pixelation and time resolution.
+This is probably not a real and realistic requirement, see the discussion in Sec.~\ref{sec:script-based-results}.
+The assumption that a histogram-representation for all workspaces is required leads to a rather high baseline requirement --- scaling with the total event count only becomes visible near $10^9$ events and above.
+Excluding the special cases listed above, the required memory will mostly not exceed $256~\mathrm{GByte}$ or up to $1~\mathrm{TByte}$ for large runs with $10^{10}$ events.
+The requirement can be lowered further by reducing $\Nworkspace$ and/or by avoiding binning of most workspaces, i.e., working purely in event mode.
 }
-\end{table}
+\end{figure}
 
 Instrument scientist expect that typically 5 interactive sessions would be required per instrument at any given time.
 This figure is to be combined with requirements for data analysis since typically the interactive sessions would be used for both, data reduction and data analysis.
@@ -420,27 +430,13 @@ Resolution options and the resulting bin counts are given in Tab.~\ref{tab:resol
 Python scripts to generate the tables are described in App.~\ref{app:scripts}.
 The resulting data for the given parameters can be found in Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic}.
 
-
-TODO
-effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
-
-TODO
-discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant, discuss grouping of pixels, in particular for 3D detectors?)
-
-TODO
-table of generated data volumes?
-
-TODO
-discuss after hw tables whether/what we really cannot rely on users laptops
-
-
-We adopt a simplified model to estimate the amount of required main memory.
+We adopt a simplified model to estimate the amount of required main memory.\footnote{This is similar to but different from Eq.~\eqref{eq:ram-interactive} used for the case of interactive reduction.}
 We define
 
 \begin{align}
   \label{eq:ram}
   M &\equiv \Ncore(1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte}) + N_{\text{workspace}}(24\Nbin + 16\Nevent)~\mathrm{Byte},\\
-  \Mcore &\equiv \frac{M}{\Ncore} = 1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte} + \frac{N_{\text{workspace}}}{\Ncore}(24\Nbin + 16\Nevent)~\mathrm{Byte}.
+  \Mcore &\equiv \frac{M}{\Ncore} = 1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte} + \frac{\Nworkspace}{\Ncore}(24\Nbin + 16\Nevent)~\mathrm{Byte}.
 \end{align}
 with
 \begin{itemize}
@@ -450,6 +446,9 @@ with
   \item $24~\mathrm{Byte}$ per bin per workspace for double-precision X, Y, and E.
   \item $16~\mathrm{Byte}$ per event per workspace for double-precision time-of-flight and pulse-time.
 \end{itemize}
+This is a naive model that assumes that we require a histogram representation of the data at some point during the reduction.
+Histogram mode is used for visualization as well as data reduction steps that cannot be done in event mode, such as normalization.
+Accounting for memory for a full histogram representation can lead to very high memory requirements, see in particular the discussion on \dream below.
 
 \begin{table}
   \centering
@@ -461,6 +460,7 @@ with
     $\Tevent$ & $10^{-6}~\mathrm{s}$ \\
     $\Bmax$ & $10^8~\mathrm{s}^{-1}$ \\
     scale factor for $\Nevent$ & 2 & to approximate cost from need to reduce sample \emph{and} background for every sample run TODO above we state the Nevent includes this, this is just internal based on count required for sample run (need it if we give that in a table?) \\
+    $\Nworkspace$ & 5 \\
     $\Nreduction$ & 2 \\
     $\Ncore^{\text{max}}$ & 512 & set as arbitrary limit to reduce the number of nonsensical results from special parameter combinations in conflict with generic performance requirements from Sec.~\ref{sec:scaling-analysis} \\
     \hline
@@ -478,8 +478,8 @@ with
     \hline
     \hline
     \multirow{2}{*}{\beer}
-    & medium-flux & 2000 \\
-    & high-flux & 8500 \\
+    & medium-flux & 8500 \\
+    & high-flux & 2000 \\
     \hline
     \multirow{1}{*}{\bifrost}
     & average & 850\\
@@ -597,17 +597,57 @@ However, there are clearly cases with high peak-core requirements.
 Furthermore, in the early days with few operating instruments and a smaller cluster it needs to be ensured that an appropriate partition is always available within a to be defined time frame.
 Determining the resulting required size of the compute cluster is beyond the scope of this investigation.
 
-appendix: usage instructions for scripts
+Instrument with a very high time resolution and high pixel count such as \dream suffer from an exceedingly high memory requirement.
+In reality there are probably ways to alleviate this issue, arising from a full histogram representation of the data.
+Working in event mode we have to following options:
+\begin{enumerate}
+  \item For visualization purposes, on-the-fly binning of event data could be implemented.
+  \item The transition to histogram mode can be done histogram-by-histogram at the point of histogram summation, e.g., for powder diffraction workflows in the algorithm \verb|DiffractionFoccusing| used for \dream.
+    In the case of powder diffraction this is already supported by the existing workflow.
+    However, this is only possible provided that there are no issues arising from performing normalization in event mode, as described in \url{http://journals.iucr.org/j/issues/2016/02/00/fs5119/index.html}.
+\end{enumerate}
+
+
+
+TODO
+effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
+
+TODO
+discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant)
+
+TODO
+table of generated data volumes?
+
+TODO
+discuss after hw tables whether/what we really cannot rely on users laptops
+
+
+
 
 \section{Hardware components}
 
+
 \subsection{RAM}
 
-Some but not all reductions require a lot of RAM.
-Therefore, distinguishing between \emph{normal} and \emph{high-mem} machine configurations probably makes sense.
-TODO: How many high-mem nodes are required, compared to normal? What is normal, what is high?
+Distinguishing between \emph{default} and \emph{high-mem} machine configurations probably makes sense.
+With the parameter settings used for Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic} we obtain a typical memory requirement of $\Mcore$ up to $\Mcore^{\text{default}} = 10~\mathrm{GByte}$.
+\bifrost is likely to fall in the $\Mcore^{\text{default}}$ class even when considering a detector scan.
+The are some major exceptions which we label $\Mcore^{\text{high-mem}}$ like \cspec with $\Mcore$ up to $30~\mathrm{GByte}$ and \dream exceeding $100~\mathrm{GByte}$ per core in its highest-resolution mode.
+\magic is also in the $\Mcore^{\text{high-mem}}$ class, but the precise requirement depends on how the combination of rotation angles is handled.\footnote{The figures in Tab.~\ref{tab:hardware-magic} do \emph{not} explicitly include handling of multiple angles or merging, unless it is covered by the generic factor $\Nworkspace$.}
 
-Typically faster RAM is more important than more cores (detailed benchmarks pending)?
+It is worth noting that a large part of the huge memory requirements for \dream, \magic, and also \cspec come from the large number of detector pixels resulting in a large $\Nspec$.
+Both instruments use the same volumetric detector technology with 32 layers of voxels.
+While there are long-term plans to use the depth information for ray-tracing, it is not absolutely necessary from the beginning.
+Once could argue that we can thus project the voxel data onto a grid of pixels, gaining an order of magnitude reduction of $\Nspec$.
+However, cannot rely on that at this point since there are a couple of complications:
+\begin{enumerate}
+  \item Voxels are not aligned with the secondary flight paths so any projection will need to rebin the data, splitting events into fractional events, unless done in histogram-mode.
+  \item Voxel-layer-dependent calibration may be necessary, preventing and early transition to a lower $\Nspec$.
+\end{enumerate}
+
+We currently do not have benchmarks relating the \mantid performance to RAM bandwidth.
+However, given the computational structure of \mantid, we expect that a higher RAM bandwidth is more important than a large number of cores per node.
+
 
 \subsection{Network}
 
@@ -617,15 +657,28 @@ During file system reads and writes there will also be significant communication
 Non-I/O algorithms in \mantid typically have either no communication or communication with only moderate latency and bandwidth requirements.
 While Ethernet is not sufficient, our current feeling is that any Infiniband network is, even if it is an older revision.
 
-\subsection{Disk I/O}
 
-effect of I/O bandwidth, in particular limits on reduction speed.
+\subsection{Filesystem I/O}
+
+The filesystem bandwidth is crucial.
+For Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic} we used $\Bmax = 10^8~\mathrm{s}^{-1}$ to model the maximum read bandwidth \emph{for a particular reduction}, i.e., we assumed that the would be \emph{no resource contention}.
+The quoted $\Bmax$ corresponds to an approximate bandwidth of $1~\mathrm{GByte/s}$, depending also on the \nexus compression level.
+Determining when conflicts could arise is beyond the scope of this report.
+If conflicts are likely $\Bmax$ should be reduced to incorporate the contention into the model.
+
+While all workflows need to read significant amounts of data, the same is not true for writing:
+\begin{itemize}
+  \item \bifrost, \cspec, and potentially \magic will write large files, whereas the output files for \beer, \dream, \estia, and \loki are small.
+  \item For interactive reduction we need to take into account saving and loading of \mantid project files which often contain all workspaces and can thus become very large.
+\end{itemize}
+
+
 
 
 \section{Interpretation}
 
-
-
+- list of things that need to be clarified?
+- can we get away without using histograms, e.g., for \dream, running diffraction focussing on an event workspace, rebinning only the spectrum that is currently being processed (if they want to llok at the raw data, rebin interactively?!)
 
 \appendix
 

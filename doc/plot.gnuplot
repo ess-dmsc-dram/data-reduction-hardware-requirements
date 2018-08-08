@@ -92,6 +92,58 @@ p \
 unset multiplot
 
 
+reset
+set term pdf size 8,4
+set outp "interactive-ram.pdf"
+
+set xra[1e7:1e10]
+set log x
+set yra [16:]
+set log y 2
+set key outside
+set xla "N_{event}" offset 0,1
+set yla "GByte" offset 2
+
+interactive_ram(Nspec, Nbin, Nevent)=2 + (Nspec*256 + 10*(24*Nspec*Nbin + 16*Nevent))/(2**30)
+# Using a 10x scale in Nspec for BIFROST for scanning.
+p \
+  interactive_ram(400000, 8500, x)  w l lc 1 dt 1 ti 'BEER-medium-flux', \
+  interactive_ram(400000, 2000, x)  w l lc 1 dt 2 ti 'BEER-high-flux', \
+  interactive_ram(50000, 850, x)    w l lc 2 dt 1 ti 'BIFROST-average', \
+  interactive_ram(50000, 110, x)    w l lc 2 dt 2 ti 'BIFROST-high-flux', \
+  interactive_ram(750000, 1000, x)  w l lc 3 dt 1 ti 'CSPEC', \
+  interactive_ram(12000000, 71000, x) w l lc 4 dt 1 ti 'DREAM-high-resolution', \
+  interactive_ram(12000000, 10000, x) w l lc 4 dt 2 ti 'DREAM-medium', \
+  interactive_ram(12000000, 1420, x)  w l lc 4 dt 3 ti 'DREAM-high-flux', \
+  interactive_ram(500000, 450, x)     w l lc 5 dt 1 ti 'ESTIA', \
+  interactive_ram(1500000, 240, x)    w l lc 6 dt 1 ti 'LoKI', \
+  interactive_ram(2880000, 7100, x)   w l lc 7 dt 1 ti 'MAGIC'
+
+#set xra[1e5:2e7]
+#set log x
+#set yra [10:20000]
+#set log y
+#set xtics nomirror
+#set log x2
+#set x2ra[1e5:2e7]
+#set x2tics ("BEER" 400000, "CSPEC"  750000, "DREAM" 12000000, "ESTIA" 500000, "LoKI" 1500000, "MAGIC" 2880000) rotate by 90 scale 2
+#set key outside
+#set xla "N_{spec}"
+#set yla "GByte" offset 2
+#
+#interactive_ram(Nspec, Nbin, Nevent)=2 + (Nspec*256 + 10*(24*Nspec*Nbin + 16*Nevent))/(2**30)
+#p \
+#  interactive_ram(x, 200, 1e8)   w l lc 1 dt 1, \
+#  interactive_ram(x, 2000, 1e8)  w l lc 1 dt 2, \
+#  interactive_ram(x, 20000, 1e8) w l lc 1 dt 3, \
+#  interactive_ram(x, 200, 1e9)   w l lc 2 dt 1, \
+#  interactive_ram(x, 2000, 1e9)  w l lc 2 dt 2, \
+#  interactive_ram(x, 20000, 1e9) w l lc 2 dt 3, \
+#  interactive_ram(x, 200, 1e10)   w l lc 3 dt 1, \
+#  interactive_ram(x, 2000, 1e10)  w l lc 3 dt 2, \
+#  interactive_ram(x, 20000, 1e10) w l lc 3 dt 3
+
+
 #set pm3d map
 #set xra [1e5:1e8]
 #set yra [1e5:1e7]
