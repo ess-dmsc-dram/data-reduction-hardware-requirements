@@ -39,7 +39,7 @@ configs['BEER'] = {
     'name':['medium-flux', 'medium-flux-multiplexing', 'high-flux-multiplexing'],
     'rate':[3e5, 2e6, 5e7],
     'count':[1e6, 1e6, 1e6], # same run but scanning the sample volume quickly? TODO is this realistic?
-    'num_bin':[2000, 2000, 8500],
+    'num_bin':[8500, 8500, 2000],
     'use':[0.7, 0.2, 0.1]}
 
 configs['BIFROST'] = {

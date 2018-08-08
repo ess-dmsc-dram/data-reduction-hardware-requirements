@@ -111,7 +111,7 @@ For machines with a moderate number of cores of up to roughly 10 cores we can pr
 
 \subsection{Ramp-up in hot commissioning and early operations}
 
-The initial rates and pixel counts will be lower than the design values due to the ramp-up of accelerator power as well as incomplete detctor coverage.
+The initial rates and pixel counts will be lower than the design values due to the ramp-up of accelerator power and incomplete detector coverage.
 In Fig.~\ref{fig:accelerator-power} we show the estimate for the accelerator power ramp-up used in the following for scaling the expected event rates.
 ESS instrument scientists expect a linear scaling of the useable wavelength with the accelerator power.
 In Tab.~\ref{tab:pixel-counts} we list the pixel counts for the first instruments, i.e., effectively $\Nspec$.
@@ -136,7 +136,7 @@ Details for this and other parameters are listed in Sec.~\ref{sec:script-based-r
     \bifrost & ? & 5k & low pixel count but scanning\\
     \cspec & 400k & 750k \\
     % 1.25*32*6.2/(0.003*0.006) = 14000k
-    \dream & 4000 & 12000k & estimated\footnote{We did not yet receive pixel counts from DREAM, but MAGIC uses same technology with a pixel size of $3~\mathrm{mm} \times 6~\mathrm{mm}$ with 32 voxel layers. Full is $5.11~\mathrm{sr}$ with a sample-detector distance of $1.25~\mathrm{m}$. Day-1 coverage is $1.81~\mathrm{sr}$.}\\
+    \dream & 4000 & 12000k & estimated\footnote{We did not yet receive pixel counts from DREAM, but MAGIC uses same technology with a pixel size of $3~\mathrm{mm} \times 6~\mathrm{mm}$ with 32 voxel layers. Full coverage is $5.11~\mathrm{sr}$ with a sample-detector distance of $1.25~\mathrm{m}$. Day-1 coverage is $1.81~\mathrm{sr}$.}\\
     \estia & 250k & 500k \\
     \loki & 750k & 1500k \\
     \magic & 1440k & 2880k \\
@@ -205,8 +205,7 @@ The imaging beamline \odin is a special case and has thus also been excluded fro
 }
 \end{figure}
 
-There is another aspect that we have not covered yet.
-For experiments with very high throughput, i.e., quick changes of sample or sample-environment parameters, we have to deal with additional complexity in the live reduction workflow.
+For experiments with very high throughput, i.e., quick changes of sample-environment parameters or sample, we have to deal with additional complexity in the live reduction workflow.
 This could include more advanced filtering, display and comparison of multiple results at the same time,\footnote{e.g., waterfall plots} and overhead from frequent transitions to a new run.
 We have not yet started development of these features so benchmarks are not available.
 That being said, high throughput experiments are not likely to be required in the early days.
@@ -218,7 +217,7 @@ We consider it unlikely that this scenario will cause a significant overall diff
 
 \section{Interactive reduction}
 
-As discussed in Sec.~\ref{sec:threading-and-mpi-support} there is no MPI support for the GUI or interactive reduction in general and therefore there is limit scaling with the number of available cores.
+As discussed in Sec.~\ref{sec:threading-and-mpi-support} there is no MPI support for the GUI or interactive reduction in general, limiting scaling with the number of available cores.
 Generally we do not expect good scaling far beyond 10 cores.
 For reductions that are too slow in that case there are several options that can be used in practice:
 \begin{itemize}
@@ -246,10 +245,9 @@ with
   \item $16~\mathrm{Byte}$ per event per workspace for double-precision time-of-flight and pulse-time.
 \end{itemize}
 Considering the projected duration of a single run $\Trun$ for design-power event rates, most experiments seem to use roughly $10^8$ to $10^9$ events.
+Based on this equation, we give example requirements for various instrument configurations in Fig.~\ref{fig:interactive-ram}.
 Notable exceptions to this are the inelastic beamlines and the single-crystal beamlines, if we consider merging data from all sample rotation angles.
 Traditionally single crystal diffraction and inelastic scattering have the highest memory requirements but it is currently unclear whether this merge step would be done in \mantid.
-
-Based on this equation, we give example requirements for various instrument configurations in Fig.~\ref{fig:interactive-ram}.
 
 \begin{figure}
   \centering
@@ -259,13 +257,13 @@ Scaling of memory requirements for interactive reduction with the event count pe
 The plot uses the final pixel count from Tab.~\ref{tab:pixel-counts} and $\Nbin$ based on Tab.~\ref{tab:resolution}.
 The powder and single crystal diffractometers \dream, \magic, and \beer show an exceedingly high memory requirement due to the high pixelation and time resolution.
 This is probably not a real and realistic requirement, see the discussion in Sec.~\ref{sec:script-based-results}.
-The assumption that a histogram-representation for all workspaces is required leads to a rather high baseline requirement --- scaling with the total event count only becomes visible near $10^9$ events and above.
+The worst-case assumption that a histogram-representation for all workspaces is required leads to a rather high baseline requirement --- scaling with the total event count only becomes visible near $10^9$ events and above.
 Excluding the special cases listed above, the required memory will mostly not exceed $256~\mathrm{GByte}$ or up to $1~\mathrm{TByte}$ for large runs with $10^{10}$ events.
 The requirement can be lowered further by reducing $\Nworkspace$ and/or by avoiding binning of most workspaces, i.e., working purely in event mode.
 }
 \end{figure}
 
-Instrument scientist expect that typically 5 interactive sessions would be required per instrument at any given time.
+Instrument scientists expect that typically 5 interactive sessions would be required per instrument at any given time.
 This figure is to be combined with requirements for data analysis since typically the interactive sessions would be used for both, data reduction and data analysis.
 For data reduction, a lot of the time \mantid will actually be idle or unused.
 Thus simply adding the required 5 sessions to the required numbers for data analysis is likely to overestimate the required resources.
@@ -279,7 +277,7 @@ Thus simply adding the required 5 sessions to the required numbers for data anal
 \subsection{Scaling analysis}
 \label{sec:scaling-analysis}
 
-The number of cores required for MPI reduction depends on the required maximum runtime for a reduction.
+The number of cores required for MPI-based reduction depends on the required maximum runtime for a reduction.
 It is unclear what a good limit for the runtime $\Treduction$ is.
 For now we define:
 
@@ -304,7 +302,7 @@ With a couple of approximations (which are probably minor for this purpose and c
 \end{align}
 where
 \begin{itemize}
-  \item $\Nbin$ is the number of bins in the workflow, i.e., the number of spectra $\Nspec$ multiplied by the number of bins per spectrum.\footnote{Typically $\Nspec$ is the number of pixels of the instrument, but it can be different, e.g., when multiple adjacent pixels are grouped due to a lower resolution requirement or due to potential projects related to volumetric detectors.}
+  \item $\Nbin$ is the number of bins in the workflow, i.e., the number of spectra $\Nspec$ multiplied by the number of bins per spectrum.\footnote{Typically $\Nspec$ is the number of pixels of the instrument, but it can be different, e.g., when multiple adjacent pixels are grouped due to a lower resolution requirement or due to potential projections related to volumetric detectors.}
     The number of bins per spectrum depends on the bandwidth and resolution of the instrument.
     As a rule of thumb, for a given energy resolution $\delta E$ we require a bin size of $\delta E/10$.
   \item $\Nevent$ is the total number of events that are being handled in the reduction workflow.
@@ -323,7 +321,7 @@ $\Ncore$ can be adjusted such that $\Treduction$ fulfills the conditions listed 
 There can be cases where the conditions are violated, e.g., when the event rate is high and $\Bmax$ is too low.
 More details on this equation can be found in App.~\ref{app:master_eq}.
 
-Our benchmarks based on existing instruments and investigations of parameters for a series of ESS instruments show that any of the terms in Eq.~\eqref{eq:master} can be relevant or even dominant, depending on the instrument, the experiment, and the number of used cores.
+Our benchmarks based on existing instruments and investigations of parameters for a series of ESS instruments show that any of the terms in Eq.~\eqref{eq:master} can be relevant or even dominant, depending on the instrument, the experiment, and the number of used cores:
 
 \begin{itemize}
   \item 
@@ -370,6 +368,15 @@ It is important to note that $\Ncoremean$ depends on $\Ncore$, i.e., the more co
 Reasons for using more cores are primarily (1) to reduce the time for a single reduction to something that is acceptable for users, and (2) to work around memory limitations on a single node.
 There are two terms that depend on $1/\Trun$ (see Eq.~\eqref{eq:master-v2}), i.e., shorter runs will increase the number of required cores even if all other parameters such as the event rate $\Fevent$ are unchanged.
 
+%Under the assumption that we are not bound by any of the other limits we can also substitute the $5\times$ speedup factor and eliminate $\Ncore$.
+%Then Eq.~\eqref{eq:master} yields
+%
+%\begin{align}
+%  \frac{\Trun}{5} &= t_0 + \frac{\Nbin\Tbin + \Nevent\Tevent}{\Ncore} + \frac{\Nevent}{\Bmax},\\
+%  \Rightarrow \Ncore &= \frac{\Nbin\Tbin + \Nevent\Tevent}{\frac{\Trun}{5} - t_0 - \frac{\Nevent}{\Bmax}},\\
+%  \Rightarrow \Ncoremean &= \Nreduction\left[ \frac{\Nbin\Tbin + \Nevent\Tevent}{\frac{\Trun}{5} - t_0 - \frac{\Nevent}{\Bmax}} \left(\frac{t_0}{\Trun} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin}{\Trun} + \Fevent\Tevent\right].
+%\end{align}
+
 
 \subsection{Event filtering}
 
@@ -377,7 +384,7 @@ The discussion in this section is based on event filtering benchmarks conducted 
 See the reference given in App.~\ref{app:refs} for details.
 Many ESS instruments will require filtering events in one way or another.
 Benchmarks indicate that the contribution to the overall runtime is less than $10\%$, i.e., we do not need to handle it explicitly in our evaluations.
-While the cost filtering itself is not significant, in many cases we are dealing with many more workspaces after the filtering process, e.g., one for every temperature interval in a temperature scan.
+While the cost of filtering itself is not significant, in many cases we are dealing with many more workspaces after the filtering process, e.g., one for every temperature interval in a temperature scan.
 If the majority of data reduction can be done \emph{before} filtering this is not a problem.
 However, if a significant portion of data treatment can only happen after the filtering/splitting process the cost is increasing significantly since we are effectively dealing with many distinct runs.
 This problem is probably similar to the case of sample rotation angles discussed later in Tab.~\ref{tab:hardware-magic} for \magic and needs to be investigated closer in the future.
@@ -411,7 +418,7 @@ The experiments show a surprisingly consistent pattern, independent of the techn
 
 \subsection{Other factors}
 
-With low accelerator power and lower detector coverage in the early it is to be expected that the type of experiments will be different from what is envisioned for full power.
+With low accelerator power and lower detector coverage in the early days it is to be expected that the type of experiments will be different from what is envisioned for full power.
 For example, larger samples will be used to compensate for the lower rates.
 The compensation could be of up to a order of magnitude in size, at least for certain experiments.
 While some instruments indicate they will do so, e.g., \loki and \dream, not all of them will, e.g., \cspec.
@@ -429,26 +436,6 @@ Parameters used for generating the listings can be found in Tab.~\ref{tab:hardwa
 Resolution options and the resulting bin counts are given in Tab.~\ref{tab:resolution}.
 Python scripts to generate the tables are described in App.~\ref{app:scripts}.
 The resulting data for the given parameters can be found in Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic}.
-
-We adopt a simplified model to estimate the amount of required main memory.\footnote{This is similar to but different from Eq.~\eqref{eq:ram-interactive} used for the case of interactive reduction.}
-We define
-
-\begin{align}
-  \label{eq:ram}
-  M &\equiv \Ncore(1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte}) + N_{\text{workspace}}(24\Nbin + 16\Nevent)~\mathrm{Byte},\\
-  \Mcore &\equiv \frac{M}{\Ncore} = 1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte} + \frac{\Nworkspace}{\Ncore}(24\Nbin + 16\Nevent)~\mathrm{Byte}.
-\end{align}
-with
-\begin{itemize}
-  \item $1~\mathrm{GByte}$ base memory per core.
-  \item $256~\mathrm{Byte}$ of memory per pixel per core to represent the instrument geometry.
-    This is assumed to be shared between workspaces.
-  \item $24~\mathrm{Byte}$ per bin per workspace for double-precision X, Y, and E.
-  \item $16~\mathrm{Byte}$ per event per workspace for double-precision time-of-flight and pulse-time.
-\end{itemize}
-This is a naive model that assumes that we require a histogram representation of the data at some point during the reduction.
-Histogram mode is used for visualization as well as data reduction steps that cannot be done in event mode, such as normalization.
-Accounting for memory for a full histogram representation can lead to very high memory requirements, see in particular the discussion on \dream below.
 
 \begin{table}
   \centering
@@ -510,19 +497,39 @@ Details can be found in App.~\ref{app:instrument-parameters}.
 }
 \end{table}
 
+We adopt a simplified model to estimate the amount of required main memory.\footnote{This is similar to but different from Eq.~\eqref{eq:ram-interactive} used for the case of interactive reduction.}
+We define
+
+\begin{align}
+  \label{eq:ram}
+  M &\equiv \Ncore(1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte}) + N_{\text{workspace}}(24\Nbin + 16\Nevent)~\mathrm{Byte},\\
+  \Mcore &\equiv \frac{M}{\Ncore} = 1~\mathrm{GByte} + \Nspec \cdot 256~\mathrm{Byte} + \frac{\Nworkspace}{\Ncore}(24\Nbin + 16\Nevent)~\mathrm{Byte}.
+\end{align}
+with
+\begin{itemize}
+  \item $1~\mathrm{GByte}$ base memory per core.
+  \item $256~\mathrm{Byte}$ of memory per pixel per core to represent the instrument geometry.
+    This is assumed to be shared between workspaces.
+  \item $24~\mathrm{Byte}$ per bin per workspace for double-precision X, Y, and E.
+  \item $16~\mathrm{Byte}$ per event per workspace for double-precision time-of-flight and pulse-time.
+\end{itemize}
+This is a naive model that assumes that we require a histogram representation of the data at some point during the reduction.
+Histogram mode is used for visualization as well as data reduction steps that cannot be done in event mode, such as normalization.
+Accounting for memory for a full histogram representation can lead to very high memory requirements, see in particular the discussion on \dream below.
+
 \begin{table}
   \scriptsize
   \input{../BEER.tex}
   \caption{\label{tab:hardware-beer}
 Example estimate of hardware required for script-based reduction for \beer.
 In this and the following tables, the `Pixels' column refers to the build-out phase.
-`Use' is (usually) a guess of the fraction a particular instrument mode/configuration is used.
+`Use' is a guess of the fraction a particular instrument mode/configuration is used.
 The values are chosen to add up to 100\% but could be adjusted to take into account time without beam and time for changing samples.
 If the obtainable $\Treduction$ violates the conditions such as a $5\times$ speedup stated in Sec.~\ref{sec:scaling-analysis} the corresponding $\Trun$ in the table is highlighted in \textcolor{red}{red}.\\
-The biggest uncertainty comes from the duration of a single run.
+For \beer the biggest uncertainty comes from the duration of a single run.
 The measurement time for each individual measurement point in the sample can be very low.
 If each such point is considered as an independent measurement we obtain a high hardware cost, especially in \emph{high-flux-multiplexing} mode.
-If a combined treatment of the sample scan is possible the requirement is likely to be much lower in the high-flux case.
+If a combined treatment of the points in the sample scan is possible the requirement is likely to be much lower in the high-flux case.
 For the \emph{high-flux-multiplexing} mode $\Trun$ looks unrealistic (below the pulse length), yielding an enormous core count.
 The rate given by the instrument team for this mode is two orders of magnitude above the stated average rate so our naive computation of $\Trun$ may not correspond to the actual use case, i.e., the result should be interpreted with care.
 For the \emph{medium-flux-multiplexing} mode we do not have an actual statement of the event rate but we have chosen to include it as an estimate for an intermediate case.
@@ -534,6 +541,7 @@ For the \emph{medium-flux-multiplexing} mode we do not have an actual statement 
   \input{../BIFROST.tex}
   \caption{\label{tab:hardware-bifrost}
 Example estimate of hardware required for script-based reduction for \bifrost.
+Our information on \bifrost is a bit dated so this table may be inaccurate.
 The pixel count for \bifrost is very low, yielding a comparatively low hardware requirement.
 However, the detector bank is scanned and data from multiple positions is to be included in the same reduction and analysis.
 This is likely connected with an overhead which has not been included here.
@@ -555,9 +563,11 @@ If the transformation to $(\vec Q, \Delta E)$ and subsequent summation were to b
   \input{../DREAM.tex}
   \caption{\label{tab:hardware-dream}
 Example estimate of hardware required for script-based reduction for \dream.
-Not considering 
-few events per pixel, is our estimate good? overhead from eventlist?
-TODO get better estimate on run duration before writing interpretiona. may get worse if there are fewer events per run than currently estimated
+See the discussion in the text regarding the extreme memory requirement in \emph{high-resolution} mode.
+$\Ncore$ is high and is dominated by the $\Nbin$ term of Eq.~\eqref{eq:master}.
+Therefore $\Ncore$ also scales badly with $\Trun$.
+Our estimate of $\Trun$ is currently quite uncertain and this table needs to be updated once we have access to a better estimate.
+It should also be noted that while our benchmarks include the event-mode powder-diffraction workflow which will also be used for \dream, the benchmarks are based on POWGEN with only 43121 pixels, i.e., we are dealing with an extrapolation over more than two orders of magnitude.
 }
 \end{table}
 
@@ -592,34 +602,29 @@ Probably this is not a good assumption and a joint treatment of sample rotation 
 }
 \end{table}
 
-Provided that the compute cluster is large enough summing all $\Ncoremean$ for all relevant instrument could yield the required size of the compute cluster.
+Provided that the compute cluster is large enough, summing all $\Ncoremean$ for all relevant instrument configurations from Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic} could yield the required size of the compute cluster.
 However, there are clearly cases with high peak-core requirements.
 Furthermore, in the early days with few operating instruments and a smaller cluster it needs to be ensured that an appropriate partition is always available within a to be defined time frame.
 Determining the resulting required size of the compute cluster is beyond the scope of this investigation.
 
 Instrument with a very high time resolution and high pixel count such as \dream suffer from an exceedingly high memory requirement.
 In reality there are probably ways to alleviate this issue, arising from a full histogram representation of the data.
-Working in event mode we have to following options:
+Working in event mode we have the following options:
 \begin{enumerate}
   \item For visualization purposes, on-the-fly binning of event data could be implemented.
-  \item The transition to histogram mode can be done histogram-by-histogram at the point of histogram summation, e.g., for powder diffraction workflows in the algorithm \verb|DiffractionFoccusing| used for \dream.
+  \item The transition to histogram mode can be done histogram-by-histogram at the point of histogram summation, e.g., for powder diffraction workflows used for \dream in the algorithm \verb|DiffractionFoccusing|.
     In the case of powder diffraction this is already supported by the existing workflow.
     However, this is only possible provided that there are no issues arising from performing normalization in event mode, as described in \url{http://journals.iucr.org/j/issues/2016/02/00/fs5119/index.html}.
 \end{enumerate}
 
-
-
-TODO
-effects of wrong estimations for certain parameters, e.g., what happens if actual event rate is 2x higher/lower (would it be useful to tread all parameters as random values with a distribution of a certain width, such that we can do some sampling to obtain error bars?)
-
-TODO
-discuss strong influence of run duration (and the ratio of events to pixel count where either contribution becomes dominant)
-
-TODO
-table of generated data volumes?
-
-TODO
-discuss after hw tables whether/what we really cannot rely on users laptops
+One of the parameters that is hardest to pin down in discussions with the instrument teams is $\Trun$, which influences the hardware requirements in two ways:
+\begin{itemize}
+  \item Shorter $\Trun$ implies \emph{more} runs, i.e., more reductions.
+  \item The $t_0$ term and the $\Nbin$ term in Eq.~\eqref{eq:master} become more dominant in relation to $\Nevent$ since the former two terms stay constant while the latter scales with $1/\Trun$.
+    To fulfill the speedup conditions $\Ncore$ needs to be increased when $\Trun$ increases.
+\end{itemize}
+In combination this implies that in practice $\Ncoremean$ shows \emph{worse than linear} scaling with $1/\Trun$.\footnote{Unless we fix $\Ncore$ and drop our speedup conditions.}
+Any uncertainty related to $\Trun$ will thus be amplified.
 
 
 
@@ -627,7 +632,7 @@ discuss after hw tables whether/what we really cannot rely on users laptops
 \section{Hardware components}
 
 
-\subsection{RAM}
+\subsection{Main memory}
 
 Distinguishing between \emph{default} and \emph{high-mem} machine configurations probably makes sense.
 With the parameter settings used for Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic} we obtain a typical memory requirement of $\Mcore$ up to $\Mcore^{\text{default}} = 10~\mathrm{GByte}$.
@@ -635,11 +640,12 @@ With the parameter settings used for Tabs.~\ref{tab:hardware-beer}--\ref{tab:har
 The are some major exceptions which we label $\Mcore^{\text{high-mem}}$ like \cspec with $\Mcore$ up to $30~\mathrm{GByte}$ and \dream exceeding $100~\mathrm{GByte}$ per core in its highest-resolution mode.
 \magic is also in the $\Mcore^{\text{high-mem}}$ class, but the precise requirement depends on how the combination of rotation angles is handled.\footnote{The figures in Tab.~\ref{tab:hardware-magic} do \emph{not} explicitly include handling of multiple angles or merging, unless it is covered by the generic factor $\Nworkspace$.}
 
-It is worth noting that a large part of the huge memory requirements for \dream, \magic, and also \cspec come from the large number of detector pixels resulting in a large $\Nspec$.
+It is worth noting that a large part of the huge memory requirements for \dream and \magic come from the large number of detector pixels resulting in a large $\Nspec$.
 Both instruments use the same volumetric detector technology with 32 layers of voxels.
+This is similar for \cspec.
 While there are long-term plans to use the depth information for ray-tracing, it is not absolutely necessary from the beginning.
-Once could argue that we can thus project the voxel data onto a grid of pixels, gaining an order of magnitude reduction of $\Nspec$.
-However, cannot rely on that at this point since there are a couple of complications:
+One could argue that we can thus project the voxel data onto a grid of pixels, gaining an order of magnitude reduction of $\Nspec$.
+However, we cannot rely on that at this point since there are a couple of complications:
 \begin{enumerate}
   \item Voxels are not aligned with the secondary flight paths so any projection will need to rebin the data, splitting events into fractional events, unless done in histogram-mode.
   \item Voxel-layer-dependent calibration may be necessary, preventing and early transition to a lower $\Nspec$.
@@ -673,14 +679,40 @@ While all workflows need to read significant amounts of data, the same is not tr
 \end{itemize}
 
 
+\subsection{SSDs}
+
+Fast local SSDs could potentially be helpful for inelastic and single crystal, handling large multi-dimensional workspaces exceeding the available RAM.
+\mantid supports a file-backed mode for this case.
+This is something we considered as part of an investigation by Anton Piccardo-Selg, see \url{https://github.com/DMSC-Instrument-Data/documents/tree/master/investigations/MultiDimensionalInvestigation}, but due to the complexity and uncertainty of how useful it would be in practice we did not include it in any of the considerations in this documents.
+Nevertheless we should keep it in mind to increase our options in the future.
 
 
-\section{Interpretation}
 
-- list of things that need to be clarified?
-- can we get away without using histograms, e.g., for \dream, running diffraction focussing on an event workspace, rebinning only the spectrum that is currently being processed (if they want to llok at the raw data, rebin interactively?!)
+
+\section{Discussion}
+
+(discussion will be added after initial review rounds)
+
+We give an incomplete list of ``action items'' resulting from this report.
+With a couple of exceptions, most of the items in this list are not single action items but will instead involve a long-running process and effort:
+\begin{itemize}
+  \item Progressively update parameter estimates.
+  \item Ensure that estimates for \odin are included either here or in a similar report for data analysis.
+  \item Obtain updated specifications for \bifrost.
+  \item Develop better understanding of how we need to handle data from measurements with parameters scans.
+    This can be sample rotation scans for single crystal diffraction and inelastic scattering, scans of the gauge volume for engineering diffraction, and sample environment parameter scans such as temperature scans.
+    There is a variety of options to deal with this, such as handling everything independently, filtering during event loading, and filtering in memory.
+    Since there is no single solution that works for all cases it is difficult to provide a generic estimate without going into the details of every workflow.
+  \item Benchmark the influence of memory bandwidth on the \mantid performance.
+\end{itemize}
+
+
+
 
 \appendix
+
+
+
 
 \section{Related documentation}
 \label{app:refs}
@@ -690,7 +722,7 @@ While all workflows need to read significant amounts of data, the same is not tr
     \url{https://github.com/DMSC-Instrument-Data/data-reduction-hardware-requirements}
   \item Initial thoughts and plan for estimating hardware requirements:\\
     \url{https://github.com/DMSC-Instrument-Data/documents/blob/master/mantid/hardware-requirements/plan.md}
-  \item Notes from meetings with instrument responsibles:\\
+  \item Notes from meetings with instrument teams:\\
     \url{https://confluence.esss.lu.se/display/DAM/Data+Reduction}
   \item Benchmarks for live reduction (Lamar Moore):\\
     \url{https://github.com/DMSC-Instrument-Data/documents/blob/master/investigations/Live%20Reduction/LiveReductionInvestigation.md}
@@ -699,6 +731,9 @@ While all workflows need to read significant amounts of data, the same is not tr
   \item \odin data rate report:\\
     \url{https://confluence.esss.lu.se/download/attachments/274116159/report_ODIN_data_rate_volume.pdf?api=v2}
 \end{itemize}
+
+
+
 
 \section{Motivation of the performance master equation}
 \label{app:master_eq}
@@ -738,8 +773,12 @@ The rationale for Eq.~\eqref{eq:master} is as follows:
   Thus the bin count will be fixed for a given run but can vary between runs within a instrument-specific range.
 \end{itemize}
 
+
+
+
 \section{Instrument parameters}
 \label{app:instrument-parameters}
+
 
 \subsection{\beer}
 
@@ -748,6 +787,7 @@ The rationale for Eq.~\eqref{eq:master} is as follows:
     The wavelength band is $1.7~\angstrom$ but there are chopper settings to double it using pulse skipping.
     For a wavelength band centered at $2~\angstrom$ this yields bins counts of $10\times1.7~\angstrom/(0.01\cdot2~\angstrom) = 850$ for the low resolution setting and $10\times1.7~\angstrom/(0.001\cdot2~\angstrom) = 8500$ for the highest resolution.
 \end{itemize}
+
 
 \subsection{\bifrost}
 
@@ -758,12 +798,14 @@ The rationale for Eq.~\eqref{eq:master} is as follows:
     At $4~\angstrom$ with 4\% resolution we obtain $10\times1.7~\angstrom/(0.02\cdot4.0~\angstrom) = 110$.
 \end{itemize}
 
+
 \subsection{\dream}
 
 \begin{itemize}
   \item The (useful) range of the pulse shaping is $10~\mathrm{\mu s}$ to $500~\mathrm{\mu s}$.
     We thus obtain $10\times71~\mathrm{ms}/10~\mathrm{\mu s} = 71000$ bins for the highest resolution and $10\times71~\mathrm{ms}/500~\mathrm{\mu s} = 1420$ for the lowest resolution.
 \end{itemize}
+
 
 \subsection{\estia}
 
@@ -774,12 +816,14 @@ From the original proposal:
     In the simplest case with constant bin width this yields $10\times(9.4-5.0)/(0.02\cdot5.0) = 450$ bins, where the factor of 10 is the aforementioned rule of thumb to obtain a required bin count from a resolution.
 \end{itemize}
 
+
 \subsection{\loki}
 
 \begin{itemize}
   \item Resolution is dominated by the pulse length.
     We thus obtain an approximate bin count of  $10\times71~\mathrm{ms}/3~\mathrm{ms} = 240$.
 \end{itemize}
+
 
 \subsection{\magic}
 
@@ -789,9 +833,13 @@ From the original proposal:
 \end{itemize}
 
 
+
+
 \section{Helper scripts}
 \label{app:scripts}
 
 Use \verb|generate_tables.py| to generate a table output on the command line as well as input files for this LaTex document.
+High-level parameters are currently set in \verb|performance_model.py| and \verb|beamline.py|.
+Instrument-specific settings can be found in \verb|generate_tables.py|.
 
 \end{document}
