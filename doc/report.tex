@@ -57,6 +57,10 @@
 \newcommand{\mantid}{Mantid\xspace}
 \newcommand{\nexus}{NeXus\xspace}
 
+\makeatletter
+\def\input@path{{generated/}}
+\makeatother
+
 \begin{document}
 
 \title{Estimation of hardware requirements for data reduction with \mantid at ESS}
@@ -519,7 +523,7 @@ Accounting for memory for a full histogram representation can lead to very high 
 
 \begin{table}
   \scriptsize
-  \input{../BEER.tex}
+  \input{BEER.tex}
   \caption{\label{tab:hardware-beer}
 Example estimate of hardware required for script-based reduction for \beer.
 In this and the following tables, the `Pixels' column refers to the build-out phase.
@@ -538,7 +542,7 @@ For the \emph{medium-flux-multiplexing} mode we do not have an actual statement 
 
 \begin{table}
   \footnotesize
-  \input{../BIFROST.tex}
+  \input{BIFROST.tex}
   \caption{\label{tab:hardware-bifrost}
 Example estimate of hardware required for script-based reduction for \bifrost.
 Our information on \bifrost is a bit dated so this table may be inaccurate.
@@ -550,7 +554,7 @@ This is likely connected with an overhead which has not been included here.
 
 \begin{table}
   \footnotesize
-  \input{../CSPEC.tex}
+  \input{CSPEC.tex}
   \caption{\label{tab:hardware-cspec}
 Example estimate of hardware required for script-based reduction for \cspec.
 We assume that combining data from multiple runs (rotations) is \emph{not} part of data reduction and is handled by the analysis software.
@@ -560,7 +564,7 @@ If the transformation to $(\vec Q, \Delta E)$ and subsequent summation were to b
 
 \begin{table}
   \footnotesize
-  \input{../DREAM.tex}
+  \input{DREAM.tex}
   \caption{\label{tab:hardware-dream}
 Example estimate of hardware required for script-based reduction for \dream.
 See the discussion in the text regarding the extreme memory requirement in \emph{high-resolution} mode.
@@ -573,7 +577,7 @@ It should also be noted that while our benchmarks include the event-mode powder-
 
 \begin{table}
   \scriptsize
-  \input{../ESTIA.tex}
+  \input{ESTIA.tex}
   \caption{\label{tab:hardware-estia}
 Example estimate of hardware required for script-based reduction for \estia.
 The average required core count is low.
@@ -584,7 +588,7 @@ The peak core count can be reduced by accepting a longer reduction time for the 
 
 \begin{table}
   \scriptsize
-  \input{../LoKI.tex}
+  \input{LoKI.tex}
   \caption{\label{tab:hardware-loki}
 Example estimate of hardware required for script-based reduction for \loki.
 Peak as well as average core count requirements are low.
@@ -593,7 +597,7 @@ Peak as well as average core count requirements are low.
 
 \begin{table}
   \footnotesize
-  \input{../MAGIC.tex}
+  \input{MAGIC.tex}
   \caption{\label{tab:hardware-magic}
 Example estimate of hardware required for script-based reduction for \magic.
 The numbers given here are very high --- and most likely unrealistic --- due to a combination of a high pixel count and a low event count per sample rotation angle, with only $10^5$ to $5\times10^5$ events per rotation angle quoted by the instrument scientists.

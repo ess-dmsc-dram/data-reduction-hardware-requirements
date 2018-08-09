@@ -88,7 +88,7 @@ for instrument_name, config in configs.items():
         beamline.add_phase(phase)
     for name, use, rate, num_bin, count in zip(config['name'], config['use'], config['rate'], config['num_bin'], config['count']):
         beamline.add_config(name, use, rate/u.second, count, num_bin)
-    with open("{}.tex".format(instrument_name), "w") as output:
+    with open("doc/generated/{}.tex".format(instrument_name), "w") as output:
         output.write(generate_latex_header())
         latex = beamline.run([0.2, 0.5, 1.0, 2.0, 5.0], 5)
         for line in latex:
