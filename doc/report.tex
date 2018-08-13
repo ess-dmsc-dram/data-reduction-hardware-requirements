@@ -663,6 +663,21 @@ However, we cannot rely on that at this point since there are a couple of compli
 
 We currently do not have benchmarks relating the \mantid performance to RAM bandwidth.
 However, given the computational structure of \mantid, we expect that a higher RAM bandwidth is more important than a large number of cores per node.
+We show an attempt to prove this in Fig.~\ref{fig:memory-bandwidth}.
+However, since the effects of changing the number of used memory slots in a multi-core system are complex we should be careful to read to much into these results.
+
+\begin{figure}
+  \centering
+\includegraphics[height=0.33\textheight]{../benchmarks/memory-bandwidth/memory-bandwidth.pdf}
+\caption{\label{fig:memory-bandwidth}
+Left panel:
+Memory bandwidth as measured by \emph{pmbw} (\url{https://github.com/bingmann/pmbw}) depending on the number of equipped memory slots in a dual-socket Xeon E5-2620 v3 running at 2.40GHz.
+The DIMMs are DDR4 running at 1866 MHz.
+Right panel:
+Runtime of a \mantid reduction with approximately $6\cdot10^8$ events.
+With only a single DIMM the scaling with the number of MPI appears to be more limited.
+}
+\end{figure}
 
 
 \subsection{Network}
