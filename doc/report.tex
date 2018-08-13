@@ -189,9 +189,10 @@ Combining these opposite effects, which --- according to preliminary benchmarks 
 That is, without having access to much more detailed workflows and instrument models we have the crude estimate
 
 \begin{align}
-  R_{\text{live}} &= \frac{N_{\text{frame}}^{\text{max}}}{14} = \frac{3\cdot10^{13}~\mathrm{s}}{14\Fevent\Nspec} = \frac{2\cdot10^{12}~\mathrm{s}}{\Fevent\Nspec},
+  R_{\text{live}} &= \frac{N_{\text{frame}}^{\text{max}}}{14} = \frac{a}{14\Fevent\Nspec} = \frac{2.7(1)\cdot10^{13}~\mathrm{s}}{14\Fevent\Nspec} = \frac{2\cdot10^{12}~\mathrm{s}}{\Fevent\Nspec},
 \end{align}
 where $N_{\text{frame}}^{\text{max}}$ is the maximum number of consumed frames as in Tab.~\ref{tab:consumption-rate}, 14 is the number of frames per second at ESS, and $\Fevent$ is the event rate.
+The constant $a$ is obtained from a fit to the data in Tab.~\ref{tab:consumption-rate}, excluding the SANS2D data point at $10^5$.
 We require $R_{\text{live}} > 1$ to be able to support live reduction without MPI.
 In Fig.~\ref{fig:live-reduction-no-mpi} we show the implications for the first ESS instruments, depending on the accelerator power.
 With the exception of \dream and possibly \magic, we seem to be able to handle most cases for most instruments even at higher accelerator power.
