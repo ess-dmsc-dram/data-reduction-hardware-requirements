@@ -75,7 +75,8 @@
 \subsection{Overview}
 
 The aim of this document is to capture our understanding of what hardware resources will be required for reducing data with \mantid for ESS.
-While we attempt to give some estimates for, e.g., required core counts, it will become clear below there are too many uncertainties. In practice the main contribution of this document may thus be the description of how various parameters affect what hardware is required, allowing us the continuously update and improve our estimates.
+While we attempt to give some estimates for, e.g., required core counts, it will become clear below there are too many uncertainties to specify hardware requirements.
+In practice the main contribution of this document may thus be the description of how various parameters affect what hardware is required, allowing us the continuously update and improve our estimates.
 
 Data reduction covers three main cases, live reduction, interactive reduction, and script-based reduction.
 
@@ -104,7 +105,7 @@ The \mantid framework is multithreaded and algorithms run by a script or interac
 To allow for scaling data reduction beyond a single node, MPI support has been added to \mantid.
 MPI support is only available for script-based reduction.
 In principle it could also be used for live reduction, provided that it is only a passive way to observe raw and reduced data.
-There is no MPI support connected to the GUI and there are no plans for this either.\footnote{That is, there will be no equivalent to the client-server MPI mode supported by, e.g., ParaView.}.
+There is no scope for MPI support connected to the GUI.\footnote{That is, with the current scope there will be no equivalent to the client-server MPI mode supported by, e.g., ParaView.}.
 
 In various benchmarks we observed that generally an equivalent threaded run of a \mantid reduction script takes longer than the same reduction done with MPI:\footnote{This is true even without the optimized MPI-based NeXus loader.}
 The scaling with the number of used cores is worse.
@@ -115,12 +116,12 @@ For machines with a moderate number of cores of up to roughly 10 cores we can pr
 
 \subsection{Ramp-up in hot commissioning and early operations}
 
-The initial rates and pixel counts will be lower than the design values due to the ramp-up of accelerator power and incomplete detector coverage.
+The initial rates and pixel counts will be lower than the design values due to the ramp-up of accelerator power and incomplete detector coverage owing to build-out phases.
 In Fig.~\ref{fig:accelerator-power} we show the estimate for the accelerator power ramp-up used in the following for scaling the expected event rates.
-ESS instrument scientists expect a linear scaling of the useable wavelength with the accelerator power.
+ESS instrument scientists expect a linear scaling of event rate in the useable wavelength band with the accelerator power.
 In Tab.~\ref{tab:pixel-counts} we list the pixel counts for the first instruments, i.e., effectively $\Nspec$.
 We do not list the imaging beamline \odin.
-It is not suitable for joint estimation with the other beamlines and it reduction hardware requirements should probably be considered jointly with its requirements for reconstruction and analysis.
+It is not suitable for joint estimation with the other beamlines and its reduction hardware requirements should probably be considered jointly with its requirements for reconstruction and analysis.
 To obtain $\Nbin$ we need to combine $\Nspec$ with the number of bins per spectrum.
 This depends on the resolution of the instrument, which can be configurable.
 Details for this and other parameters are listed in Sec.~\ref{sec:script-based-results}.
@@ -153,7 +154,7 @@ Details for this and other parameters are listed in Sec.~\ref{sec:script-based-r
 
 \section{Live reduction}
 
-The discussion in this section is based on live reduction benchmarks conducted by Lamar Moore.
+The discussion in this section is based on live reduction benchmarks conducted by Lamar Moore.\footnote{Tested with an Intel Core i7 with 4 cores, 8 MByte cache, and 64 GByte RAM. The used Mantid version is equivalent to release 3.13.}
 See the reference given in App.~\ref{app:refs} for details.
 In Tab.~\ref{tab:consumption-rate} we show benchmark results for the event consumption rate of the Kafka event listener in \mantid without processing or visualization.
 This test is done using a default (non-MPI) build of \mantid.
