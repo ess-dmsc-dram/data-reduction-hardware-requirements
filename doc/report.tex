@@ -154,10 +154,10 @@ Details for this and other parameters are listed in Sec.~\ref{sec:script-based-r
 
 \section{Live reduction}
 
-The discussion in this section is based on live reduction benchmarks conducted by Lamar Moore.\footnote{Tested with an Intel Core i7 with 4 cores, 8 MByte cache, and 64 GByte RAM. The used Mantid version is equivalent to release 3.13.}
+The discussion in this section is based on live reduction benchmarks conducted by Lamar Moore.\footnote{Tested with an Intel Core i7 with 4 cores, 8 MByte cache, and 64 GByte RAM..}
 See the reference given in App.~\ref{app:refs} for details.
 In Tab.~\ref{tab:consumption-rate} we show benchmark results for the event consumption rate of the Kafka event listener in \mantid without processing or visualization.
-This test is done using a default (non-MPI) build of \mantid.
+This test is done using a default (non-MPI) build of \mantid with a version roughly equivalent to release 3.13.
 MPI support for the Kafka listener is not implemented currently.
 
 With the exception of the SANS2D data point at $10^5$ the scaling with the event rate is linear.\footnote{It is likely that for the high rate of more than 1000 frames per second other effects become relevant. Since we are not interested in such high frame rates we ignore this data point and assume linear scaling.}
@@ -205,6 +205,7 @@ However, we will definitely require MPI support in live reduction for \dream fro
 With increasing accelerator power, $\Fevent$ increases and $R_{\text{live}}$ decreases.
 We require $R_{\text{live}} > 1$ to be able to handle the data.
 The plot range has been chosen accordingly --- a graph hitting the lower horizontal axis implies that the rate cannot be handled anymore.
+The configuration names for \loki refer to the collimation length, which influences the flux.
 For \bifrost the pixel count is very low and we are not confident that we can extrapolate the scaling benchmarks from Tab.~\ref{tab:consumption-rate} this far.
 We have therefore excluded the panel for \bifrost but expect that the rate can be handled even at a power of $5~\mathrm{MW}$.
 The imaging beamline \odin is a special case and has thus also been excluded from this figure.
@@ -223,7 +224,7 @@ We consider it unlikely that this scenario will cause a significant overall diff
 
 \section{Interactive reduction}
 
-As discussed in Sec.~\ref{sec:threading-and-mpi-support} there is no MPI support for the GUI or interactive reduction in general, limiting scaling with the number of available cores.
+As discussed in Sec.~\ref{sec:threading-and-mpi-support} there is no provisioning for MPI support for the GUI or interactive reduction in general, limiting scaling with the number of available cores.
 Generally we do not expect good scaling far beyond 10 cores.
 For reductions that are too slow in that case there are several options that can be used in practice:
 \begin{itemize}
@@ -399,7 +400,7 @@ This problem is probably similar to the case of sample rotation angles discussed
 \subsection{Baseline benchmarks}
 \label{sec:benchmarks}
 
-To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bmax$ in Eq.~\eqref{eq:master} a number of benchmarks have been undertaken.
+To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bmax$ in Eq.~\eqref{eq:master} a number of benchmarks have been undertaken.\footnote{Most MPI-related changes have been included in the \verb|master| branch as of release 3.12 and 3.13.}
 
 \begin{enumerate}
   \item Using an MPI-build of \mantid we measured run times of workflows for SANS, powder diffraction, and direct geometry spectroscopy (using the ISIS workflow for SANS2D, the \verb|SNSPowderDiffraction| workflow for PG3, and the \verb|DgsReduction| workflow for CNCS).
@@ -484,7 +485,7 @@ The resulting data for the given parameters can be found in Tabs.~\ref{tab:hardw
     \multirow{3}{*}{\dream}
     & high-resolution & 71000 \\
     & medium & 10000 \\
-    & high-intensity & 1420 \\
+    & high-flux & 1420 \\
     \hline
     \multirow{1}{*}{\estia}
     & (all) & 450 \\
@@ -547,7 +548,7 @@ For the \emph{medium-flux-multiplexing} mode we do not have an actual statement 
   \input{BIFROST.tex}
   \caption{\label{tab:hardware-bifrost}
 Example estimate of hardware required for script-based reduction for \bifrost.
-Our information on \bifrost is a bit dated so this table may be inaccurate.
+Our information on \bifrost is a bit dated (from May 2017) so this table may be inaccurate since we were less aware of some factors that strongly influence hardware requirements.
 The pixel count for \bifrost is very low, yielding a comparatively low hardware requirement.
 However, the detector bank is scanned and data from multiple positions is to be included in the same reduction and analysis.
 This is likely connected with an overhead which has not been included here.
@@ -561,6 +562,7 @@ This is likely connected with an overhead which has not been included here.
 Example estimate of hardware required for script-based reduction for \cspec.
 We assume that combining data from multiple runs (rotations) is \emph{not} part of data reduction and is handled by the analysis software.
 If the transformation to $(\vec Q, \Delta E)$ and subsequent summation were to be done in \mantid the hardware requirement would increase significantly.
+We currently assume that this would be done as part of the \verb|PACE| project.
 }
 \end{table}
 
@@ -583,7 +585,7 @@ It should also be noted that while our benchmarks include the event-mode powder-
   \caption{\label{tab:hardware-estia}
 Example estimate of hardware required for script-based reduction for \estia.
 The average required core count is low.
-With exception of the reference measurements in \emph{high-intensity} mode the required hardware the peak core count is also low.
+With exception of the reference measurements in \emph{high-flux} mode the required hardware the peak core count is also low.
 The peak core count can be reduced by accepting a longer reduction time for the reference measurements, which are infrequent and only of short duration.
 }
 \end{table}

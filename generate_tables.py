@@ -38,17 +38,17 @@ configs['CSPEC'] = {
 
 configs['DREAM'] = {
     'phases':[4000000,12000000],
-    'name':['high-resolution', 'medium', 'high-intensity'],
+    'name':['high-resolution', 'medium', 'high-flux'],
     'rate':[1.3e6, 1e7, 7.5e7],
     'count':[5e8, 5e8, 5e8], # high resolution is 10 minutes per run
     'num_bin':[71000, 10000, 1420],
     'use':[0.33, 0.33, 0.33]}
 
-# Specular-high-intensity rate is up to 2e7 in total reflection (with two detector banks), but would be used usually for higher angles (only 5% in specular mode), use 2e6 as adjusted rate guess.
+# Specular-high-flux rate is up to 2e7 in total reflection (with two detector banks), but would be used usually for higher angles (only 5% in specular mode), use 2e6 as adjusted rate guess.
 configs['ESTIA'] = {
     # TODO configs with 10x higher resolution for WFM upgrade?
     'phases':[250000,500000],
-    'name':['reference-high-intensity', 'reference-normal', 'specular-high-intensity', 'specular', 'off-specular'],
+    'name':['reference-high-flux', 'reference-normal', 'specular-high-flux', 'specular', 'off-specular'],
     'rate':[1e8, 4e6, 2e6, 8e5, 8e5],
     'count':[1e9, 1e9, 1e7, 1e7, 1e9],
     'num_bin':[450, 450, 450, 450, 450],

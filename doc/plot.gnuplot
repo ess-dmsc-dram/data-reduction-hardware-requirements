@@ -62,9 +62,9 @@ p \
   Rlive(4.69e4*x/5,1500000) w l ti "8m-small-sample"
 set title "ESTIA"
 p \
-  Rlive(1e8*x/5, 500000) w l ti "reference-high-intensity", \
+  Rlive(1e8*x/5, 500000) w l ti "reference-high-flux", \
   Rlive(4e6*x/5, 500000) w l ti "reference-normal", \
-  Rlive(2e6*x/5, 500000) w l ti "specular-high-intensity", \
+  Rlive(2e6*x/5, 500000) w l ti "specular-high-flux", \
   Rlive(8e5*x/5, 500000) w l ti "specular", \
   Rlive(8e5*x/5, 500000) w l ti "off-specular"
 set title "CSPEC"
@@ -77,7 +77,7 @@ p \
   Rlive(1e6*x/5, 2880000) w l ti "normal"
 set title "DREAM"
 p \
-  Rlive(7.5e7*x/5, 12000000) w l ti "high-intensity", \
+  Rlive(7.5e7*x/5, 12000000) w l ti "high-flux", \
   Rlive(1e7*x/5,   12000000) w l ti "medium-resolution", \
   Rlive(1.3e6*x/5, 12000000) w l ti "high-resolution"
 set title "BEER"
