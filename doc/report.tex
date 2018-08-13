@@ -76,7 +76,7 @@
 
 The aim of this document is to capture our understanding of what hardware resources will be required for reducing data with \mantid for ESS.
 While we attempt to give some estimates for, e.g., required core counts, it will become clear below there are too many uncertainties to specify hardware requirements.
-In practice the main contribution of this document may thus be the description of how various parameters affect what hardware is required, allowing us the continuously update and improve our estimates.
+In practice the main contribution of this document may thus be the description of how various parameters affect what hardware is required, allowing us to continuously update and improve our estimates.
 
 Data reduction covers three main cases, live reduction, interactive reduction, and script-based reduction.
 
@@ -86,10 +86,11 @@ It is critical that this is available at all times so a dedicated pool of hardwa
 
 \paragraph{Interactive reduction} 
 The general view is that data at ESS will be so large that users cannot do data reduction on their laptop or desktop PC. Therefore DMSC needs to provide resources for all interactive workflows using the \mantid GUI (MantidPlot or its successor) for data reduction and visualization.
-This is required during a user visit as well as a certain time period after the experiment.
+This is required during a user visit as well as for a certain time period after the experiment.
 Furthermore, we need to provide access to such resources \emph{before} an experiment such that users can familiarize themselves with the tools and provided software infrastructure, avoiding wasting beam time due to software problems.
-For interactive reduction, due to the interactive nature, high CPU use will alternate with shorter or longer idle breaks.
-However, generally there will be a rather large permanent memory requirement, i.e., clustering interactive user sessions on a single compute node is only possible to a limited extent, and will require nodes with a large amount of memory.
+During interactive reduction, CPU usages usually alternate between high and idle states, and the duration of each period is highly variable.
+On the other hand, there is generally a large permanent memory requirement.
+This means that clustering interactive sessions on a single compute node is only possible to a limited extent and will require nodes with a large amount of memory.
 
 \paragraph{Script-based reduction}
 Reduction of data based on a (Python) script.
@@ -101,7 +102,7 @@ For example, one could imagine that jobs for data reduction of a running experim
 \subsection{Threading and MPI support}
 \label{sec:threading-and-mpi-support}
 
-The \mantid framework is multithreaded and algorithms run by a script or interactively by the GUI will typically run with multiple threads.
+The \mantid framework is multithreaded and algorithms run from a script or interactively via the GUI will typically run with multiple threads.
 To allow for scaling data reduction beyond a single node, MPI support has been added to \mantid.
 MPI support is only available for script-based reduction.
 In principle it could also be used for live reduction, provided that it is only a passive way to observe raw and reduced data.
@@ -111,7 +112,7 @@ In various benchmarks we observed that generally an equivalent threaded run of a
 The scaling with the number of used cores is worse.
 The reason for this is not fully understood but it is probably related to the fork-join threading approach.
 Thus we cannot directly transfer results and scaling behaviors obtained for MPI to a threaded version of \mantid.
-For machines with a moderate number of cores of up to roughly 10 cores we can probably use the rule of thumb that the threaded reduction will be $2\times$ slower than the MPI reduction.
+For machines with a moderate number of cores of up to roughly 10 cores we can probably use the rule of thumb that the threaded reduction will be $2\times$ slower than the MPI reduction.\footnote{Benchmark result that show this inferior scaling behavior can be found on the last 4 pages of \url{https://github.com/mantidproject/documents/blob/master/Performance/mpi-based_data_reduction_-_different_approach.pdf}}
 
 
 \subsection{Ramp-up in hot commissioning and early operations}
@@ -121,7 +122,8 @@ In Fig.~\ref{fig:accelerator-power} we show the estimate for the accelerator pow
 ESS instrument scientists expect a linear scaling of event rate in the useable wavelength band with the accelerator power.
 In Tab.~\ref{tab:pixel-counts} we list the pixel counts for the first instruments, i.e., effectively $\Nspec$.
 We do not list the imaging beamline \odin.
-It is not suitable for joint estimation with the other beamlines and its reduction hardware requirements should probably be considered jointly with its requirements for reconstruction and analysis.
+Given that the data format for this beamline is typically a stack of images it is not suitable for a joint estimation with the other beamlines, where data is a list of events or a spectrum for every pixel.
+\odin's reduction hardware requirements should probably be considered jointly with its requirements for reconstruction and analysis.
 To obtain $\Nbin$ we need to combine $\Nspec$ with the number of bins per spectrum.
 This depends on the resolution of the instrument, which can be configurable.
 Details for this and other parameters are listed in Sec.~\ref{sec:script-based-results}.
@@ -164,9 +166,8 @@ With the exception of the SANS2D data point at $10^5$ the scaling with the event
 The benchmarks also show a (very approximately) linear scaling of the consumption rate with the number of pixels.
 This is not entirely expected.
 There are two aspects that can be used to explain the scaling:
-With more pixels the write behavior to the \verb|EventWorkspace| becomes more random leading to a less and less efficient use of cache and the rest of the memory subsystem.
-This effect should be expected to reach a steady state above a certain number of pixels.
-In addition to that, a separate vector needs to be allocated for every pixel to store the events.
+With more pixels the write behavior to the \verb|EventWorkspace| becomes more random leading to a less and less efficient use of cache and the rest of the memory subsystem.\footnote{We expect that this effect levels off once we approach 100\% cache miss rate, but it is unclear at what pixel count that will happen.}
+In addition, a separate vector needs to be allocated for every pixel to store the events.
 This allocation cost could grow linearly with the pixel count.
 
 \begin{table}
@@ -183,7 +184,7 @@ This allocation cost could grow linearly with the pixel count.
 \end{table}
 
 By increasing the update timeout, which was set to one second in Tab.~\ref{tab:consumption-rate}, the consumption rate can be improved moderately.
-A couple of other optimization also appear to be possible.
+A couple of other optimizations providing a small speedup, such as multithreading in the listener appear to be possible.
 On the other hand, live display of the raw data using the \verb|InstrumentView|, (simplified) data reduction, and live display of the reduced data add extra overhead.
 Combining these opposite effects, which --- according to preliminary benchmarks --- all appear to be in the order of a $2\times$ change, leads us to conclude that the numbers given in Tab.~\ref{tab:consumption-rate} are a reasonable estimate.
 That is, without having access to much more detailed workflows and instrument models we have the crude estimate
@@ -291,7 +292,7 @@ For now we define:
 \begin{itemize}
   \item The reduction should be $5\times$ faster than the experiment.
   \item To ensure that long-running experiments with low event rates are processed quickly we require that a minimum of $2\cdot10^6$ events/s are processed.
-  \item We never require a runtime below 30 seconds.
+  \item We never require $\Treduction < 30$ seconds.
 \end{itemize}
 A visualization of these requirements is given in Fig.~\ref{fig:reduction-time-requirement}.
 
@@ -362,12 +363,11 @@ where
 \end{itemize}
 For convenience, we can expand the master equation and obtain
 
-%TODO include factor for use-fraction and use same symbol when generating tables
 \begin{align}
-  \Ncoremean &= \frac{\Nreduction}{\Trun}\left[\Ncore \left(t_0 + \frac{\Nevent}{\Bmax}\right) + \Nbin\Tbin + \Nevent\Tevent\right]\\
+  \Ncoremean &= p_{\text{use}}\frac{\Nreduction}{\Trun}\left[\Ncore \left(t_0 + \frac{\Nevent}{\Bmax}\right) + \Nbin\Tbin + \Nevent\Tevent\right]\\
   \label{eq:master-v2}
-   &= \Nreduction\left[\Ncore \left(\frac{t_0}{\Trun} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin}{\Trun} + \Fevent\Tevent\right]\\
-   &= \Nreduction\left[\Ncore \left(\frac{t_0\Fevent}{\Nevent} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin\Fevent}{\Nevent} + \Fevent\Tevent\right].
+   &= p_{\text{use}}\Nreduction\left[\Ncore \left(\frac{t_0}{\Trun} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin}{\Trun} + \Fevent\Tevent\right]\\
+   &= p_{\text{use}}\Nreduction\left[\Ncore \left(\frac{t_0\Fevent}{\Nevent} + \frac{\Fevent}{\Bmax}\right) + \frac{\Nbin\Tbin\Fevent}{\Nevent} + \Fevent\Tevent\right].
 \end{align}
 All three lines are trivial variations of each other and are merely listed to highlight different aspects of the scaling behavior.
 
@@ -400,7 +400,7 @@ This problem is probably similar to the case of sample rotation angles discussed
 \subsection{Baseline benchmarks}
 \label{sec:benchmarks}
 
-To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bmax$ in Eq.~\eqref{eq:master} a number of benchmarks have been undertaken.\footnote{Most MPI-related changes have been included in the \verb|master| branch as of release 3.12 and 3.13.}
+To establish an estimate for the parameters $t_0$, $\Tbin$, $\Tevent$, and $\Bmax$ in Eq.~\eqref{eq:master} a number of benchmarks have been undertaken.\footnote{Most MPI-related changes have been included in the \emph{master} branch as of release 3.12 and 3.13.}
 
 \begin{enumerate}
   \item Using an MPI-build of \mantid we measured run times of workflows for SANS, powder diffraction, and direct geometry spectroscopy (using the ISIS workflow for SANS2D, the \verb|SNSPowderDiffraction| workflow for PG3, and the \verb|DgsReduction| workflow for CNCS).
@@ -425,12 +425,12 @@ The experiments show a surprisingly consistent pattern, independent of the techn
 
 \subsection{Other factors}
 
-With low accelerator power and lower detector coverage in the early days it is to be expected that the type of experiments will be different from what is envisioned for full power.
+With low accelerator power and lower detector coverage in the early days, it is to be expected that the type of experiments will be different from what is envisioned for full power.
 For example, larger samples will be used to compensate for the lower rates.
-The compensation could be of up to a order of magnitude in size, at least for certain experiments.
+The compensation could be of up to an order of magnitude in size, at least for certain experiments.
 While some instruments indicate they will do so, e.g., \loki and \dream, not all of them will, e.g., \cspec.
 We have \emph{not} included a scaling term to represent this effect in the numbers given in this document.
-Ensuring that the compute cluster size ramp up is sufficiently ahead of the accelerator power ramp up could help to deal with this uncertainty.
+Ensuring that the compute cluster size ramp up is sufficiently ahead of the accelerator power ramp up could be the solution to dealing with this uncertainty.
 
 
 \subsection{Results}
@@ -532,7 +532,10 @@ Example estimate of hardware required for script-based reduction for \beer.
 In this and the following tables, the `Pixels' column refers to the build-out phase.
 `Use' is a guess of the fraction a particular instrument mode/configuration is used.
 The values are chosen to add up to 100\% but could be adjusted to take into account time without beam and time for changing samples.
-If the obtainable $\Treduction$ violates the conditions such as a $5\times$ speedup stated in Sec.~\ref{sec:scaling-analysis} the corresponding $\Trun$ in the table is highlighted in \textcolor{red}{red}.\\
+If the obtainable $\Treduction$ violates the conditions such as a $5\times$ speedup stated in Sec.~\ref{sec:scaling-analysis} the corresponding $\Treduction$ in the table is highlighted in \textcolor{red}{red}.
+Note that in some cases $\Treduction$ is actually less than $30~\mathrm{s}$.
+The reason is that the scripts generating these tables do not test all possible values of $\Ncore$, leading to jumps in $\Treduction$.
+\\
 For \beer the biggest uncertainty comes from the duration of a single run.
 The measurement time for each individual measurement point in the sample can be very low.
 If each such point is considered as an independent measurement we obtain a high hardware cost, especially in \emph{high-flux-multiplexing} mode.
@@ -562,7 +565,7 @@ This is likely connected with an overhead which has not been included here.
 Example estimate of hardware required for script-based reduction for \cspec.
 We assume that combining data from multiple runs (rotations) is \emph{not} part of data reduction and is handled by the analysis software.
 If the transformation to $(\vec Q, \Delta E)$ and subsequent summation were to be done in \mantid the hardware requirement would increase significantly.
-We currently assume that this would be done as part of the \verb|PACE| project.
+We currently assume that this would be done as part of the PACE project.
 }
 \end{table}
 
@@ -692,7 +695,7 @@ While all workflows need to read significant amounts of data, the same is not tr
 Fast local SSDs could potentially be helpful for inelastic and single crystal, handling large multi-dimensional workspaces exceeding the available RAM.
 \mantid supports a file-backed mode for this case.
 This is something we considered as part of an investigation by Anton Piccardo-Selg, see \url{https://github.com/DMSC-Instrument-Data/documents/tree/master/investigations/MultiDimensionalInvestigation}, but due to the complexity and uncertainty of how useful it would be in practice we did not include it in any of the considerations in this documents.
-Nevertheless we should keep it in mind to increase our options in the future.
+Nevertheless we should keep it in mind to widen our options in the future.
 
 
 
