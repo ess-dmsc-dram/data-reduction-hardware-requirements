@@ -1,4 +1,4 @@
-set term pdf size 8,4
+set term pdf size 7,3
 set outp "memory-bandwidth.pdf"
 
 set multiplot layout 1,2

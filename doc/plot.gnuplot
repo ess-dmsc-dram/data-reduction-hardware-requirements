@@ -1,4 +1,4 @@
-set term pdf size 8,4
+set term pdf size 6,3
 set outp "reduction-time-requirement.pdf"
 
 Tmin=30
@@ -21,13 +21,13 @@ set style fill pattern 1
 
 plot \
   Treduction(rate_min/speedup, x) noti w filledcurves above x2 ls 2 lc rgb "grey", \
-  30 noti with filledcurves below x1 ls 2 lc rgb "grey", \
+  30 noti with filledcurves below x1 ls 2 lc rgb "green", \
   for [i=0:5] Treduction(10000*(2**i), x) ti "".(10*(2**i))."k events/s" ls i+1, \
   Treduction(rate_min/speedup, x) ti sprintf("above %1.0fk events/s", rate_min/speedup/1000) lc 7 lw 2
 
 
 reset
-set term pdf size 6,4
+set term pdf size 5,3
 set outp "accelerator-power.pdf"
 
 set xla "year"
@@ -40,17 +40,17 @@ p \
   "" u 1:2 ti "extrapolation" pt 4 lc 1
 
 reset
-set term pdf size 8,10
+set term pdf size 7,8.5
 set outp "live-reduction-no-mpi.pdf"
 Rlive(event_rate,pixels)=(2*(10**12))/(event_rate*pixels)
 framerate(event_rate,pixels)=(9*(10**7)*300000)/(event_rate*pixels)
 
 set xra [0:5]
-set yra [1:1000]
+set yra [0.1:1000]
 set samples 1000
 set xla "MW" offset 0,1
 set log y
-set yla "R_{live}" offset 2
+set yla "R_{live}" offset 3
 set multiplot layout 3,2
 set title "LoKI" offset 0,-0.5
 p \
@@ -59,32 +59,38 @@ p \
   Rlive(1.92e6*x/5,1500000) w l ti "5m-high-flux", \
   Rlive(1.2e5*x/5, 1500000) w l ti "5m-small-sample", \
   Rlive(7.5e5*x/5, 1500000) w l ti "8m-high-flux", \
-  Rlive(4.69e4*x/5,1500000) w l ti "8m-small-sample"
+  Rlive(4.69e4*x/5,1500000) w l ti "8m-small-sample", \
+  1.0 lc rgb "red" lw 2 dt 2 noti
 set title "ESTIA"
 p \
   Rlive(1e8*x/5, 500000) w l ti "reference-high-flux", \
   Rlive(4e6*x/5, 500000) w l ti "reference-normal", \
   Rlive(2e6*x/5, 500000) w l ti "specular-high-flux", \
   Rlive(8e5*x/5, 500000) w l ti "specular", \
-  Rlive(8e5*x/5, 500000) w l ti "off-specular"
+  Rlive(8e5*x/5, 500000) w l ti "off-specular",\
+  1.0 lc rgb "red" lw 2 dt 2 noti
 set title "CSPEC"
 p \
   Rlive(1e7*x/5, 750000) w l ti "RRM", \
-  Rlive(1e6*x/5, 750000) w l ti "normal"
+  Rlive(1e6*x/5, 750000) w l ti "normal",\
+  1.0 lc rgb "red" lw 2 dt 2 noti
 set title "MAGIC"
 p \
   Rlive(1e7*x/5, 2880000) w l ti "high-flux", \
-  Rlive(1e6*x/5, 2880000) w l ti "normal"
+  Rlive(1e6*x/5, 2880000) w l ti "normal",\
+  1.0 lc rgb "red" lw 2 dt 2 noti
 set title "DREAM"
 p \
   Rlive(7.5e7*x/5, 12000000) w l ti "high-flux", \
   Rlive(1e7*x/5,   12000000) w l ti "medium-resolution", \
-  Rlive(1.3e6*x/5, 12000000) w l ti "high-resolution"
+  Rlive(1.3e6*x/5, 12000000) w l ti "high-resolution",\
+  1.0 lc rgb "red" lw 2 dt 2 noti
 set title "BEER"
 p \
   Rlive(5e7*x/5, 400000) w l ti "high-flux-multiplexing", \
   Rlive(2e6*x/5, 400000) w l ti "medium-resolution-multiplexing", \
-  Rlive(3e5*x/5, 400000) w l ti "medium-resolution"
+  Rlive(3e5*x/5, 400000) w l ti "medium-resolution",\
+  1.0 lc rgb "red" lw 2 dt 2 noti
 #set title "BIFROST"
 #p \
 #  Rlive(1e6*x/5, 5000) w l ti "high-flux", \
@@ -93,7 +99,7 @@ unset multiplot
 
 
 reset
-set term pdf size 8,4
+set term pdf size 6,3
 set outp "interactive-ram.pdf"
 
 set xra[1e7:1e10]
@@ -104,7 +110,8 @@ set key outside
 set xla "N_{event}" offset 0,1
 set yla "GByte" offset 2
 
-interactive_ram(Nspec, Nbin, Nevent)=2 + (Nspec*256 + 10*(24*Nspec*Nbin + 16*Nevent))/(2**30)
+# 5 histogram workspaces and 5 event workspaces
+interactive_ram(Nspec, Nbin, Nevent)=2 + (Nspec*256 + (5*24*Nspec*Nbin + 5*16*Nevent))/(2**30)
 # Using a 10x scale in Nspec for BIFROST for scanning.
 p \
   interactive_ram(400000, 8500, x)  w l lc 1 dt 1 ti 'BEER-medium-flux', \

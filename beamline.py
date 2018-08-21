@@ -11,9 +11,10 @@ def memory_requirement(num_pixel, num_event, num_core, num_bin):
     # - We require 5 workspaces.
     base_mem = 2**30 * u.byte
     mem_per_pixel = 256 * u.byte
-    num_workspace = 5
+    num_workspace_hist = 3
+    num_workspace_event = 3
     # TODO Include memory for meta-data?
-    return num_core*(base_mem + mem_per_pixel * num_pixel) + num_workspace*(num_pixel * num_bin * 3 * 8 * u.byte + num_event * 2 * 8 * u.byte)
+    return num_core*(base_mem + mem_per_pixel * num_pixel) + num_workspace_hist*num_pixel * num_bin * 3 * 8 * u.byte + num_workspace_event * num_event * 2 * 8 * u.byte
 
 class Beamline:
     def __init__(self, name):

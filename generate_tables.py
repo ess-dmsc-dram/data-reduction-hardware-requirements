@@ -52,13 +52,13 @@ configs['ESTIA'] = {
     'rate':[1e8, 4e6, 2e6, 8e5, 8e5],
     'count':[1e9, 1e9, 1e7, 1e7, 1e9],
     'num_bin':[450, 450, 450, 450, 450],
-    'use':[0.001, 0.01, 0.05, 0.5, 0.5]}
+    'use':[0.001, 0.01, 0.049, 0.47, 0.47]}
 
 configs['LoKI'] = {
     'phases':[750000,1500000],
     'name':['3m-high-flux', '3m-small-sample', '5m-high-flux', '5m-small-sample', '8m-high-flux', '8m-small-sample'],
     'rate':[1e7, 3.33e5, 1.92e6, 1.2e5, 7.5e5, 4.69e4],
-    'count':[1e8, 1e8, 1e8, 1e8, 1e8, 1e8],
+    'count':[2e7]*6,
     'num_bin':[240, 240, 240, 240, 240, 240],
     'use':[0.1, 0.1, 0.1, 0.3, 0.1, 0.3]}
 
