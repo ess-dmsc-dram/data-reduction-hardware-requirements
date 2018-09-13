@@ -65,7 +65,7 @@ configs['LoKI'] = {
 # TODO event rates
 # TODO include pixel factor for polariations?
 configs['MAGIC'] = {
-    'phases':[1440000,2880000],
+    'phases':[491520+131072,2*491520+131072],
     'name':['normal', 'high-flux'],
     'rate':[1e6, 1e7], # "typical sample 1e7" (at high flux)
     'count':[5e5, 5e5], # for each rotation, will have >1000, interpreting each rotation as individual run does not play well with current performance model?
