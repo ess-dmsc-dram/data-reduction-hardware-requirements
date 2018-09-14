@@ -142,13 +142,13 @@ Details for this and other parameters are listed in Sec.~\ref{sec:script-based-r
     Instrument & Pixel count day 1 & Pixel count final & Comment\\
     \hline
     \beer & 200k & 400k & not including SANS upgrade\\
-    \bifrost & ? & 5k & low pixel count but scanning\\
+    \bifrost & ? & 50k & 2--4 scan positions\\
     \cspec & 400k & 750k \\
     % 1.25*32*6.2/(0.003*0.006) = 14000k
-    \dream & 4000 & 12000k & estimated\footnote{We did not yet receive pixel counts from DREAM, but MAGIC uses same technology with a pixel size of $3~\mathrm{mm} \times 6~\mathrm{mm}$ with 32 voxel layers. Full coverage is $5.11~\mathrm{sr}$ with a sample-detector distance of $1.25~\mathrm{m}$. Day-1 coverage is $1.81~\mathrm{sr}$.}\\
+    \dream & 4000 & 12000k & estimated\footnote{We did not yet receive pixel counts from \dream, but \magic uses same technology with a pixel size of $3~\mathrm{mm} \times 6~\mathrm{mm}$ with 32 voxel layers. Full coverage is $5.11~\mathrm{sr}$ with a sample-detector distance of $1.25~\mathrm{m}$. Day-1 coverage is $1.81~\mathrm{sr}$.}\\
     \estia & 250k & 500k \\
     \loki & 750k & 1500k \\
-    \magic & 623k & 1114k \\
+    \magic & 623k & 1114k & 2--3 scan positions \\
   \end{tabular}
   \caption{\label{tab:pixel-counts}Pixel counts for the first instruments. Generally instruments do not have full detector coverage at day 1 and will add more pixels in an upgrade, typically a couple of years later.}
 \end{table}
@@ -599,7 +599,7 @@ See the discussion in the text regarding the extreme memory requirement in \emph
 $\Ncore$ is high and is dominated by the $\Nbin$ term of Eq.~\eqref{eq:master}.
 Therefore $\Ncore$ also scales badly with $\Trun$.
 Our estimate of $\Trun$ is currently quite uncertain and this table needs to be updated once we have access to a better estimate.
-It should also be noted that while our benchmarks include the event-mode powder-diffraction workflow which will also be used for \dream, the benchmarks are based on POWGEN with only 43121 pixels, i.e., we are dealing with an extrapolation over more than two orders of magnitude.
+It should also be noted that while our benchmarks include the event-mode powder-diffraction workflow which will also be used for \dream, the benchmarks are based on POWGEN with only 43121 pixels, i.e., we are dealing with an extrapolation over nearly two orders of magnitude.
 }
 \end{table}
 
@@ -669,7 +669,7 @@ Any uncertainty related to $\Trun$ will thus be amplified.
 Distinguishing between \emph{default} and \emph{high-mem} machine configurations probably makes sense.
 With the parameter settings used for Tabs.~\ref{tab:hardware-beer}--\ref{tab:hardware-magic} we obtain a typical memory requirement of $\Mcore$ up to $\Mcore^{\text{default}} = 10~\mathrm{GByte}$.
 \bifrost is likely to fall in the $\Mcore^{\text{default}}$ class even when considering a detector scan.
-There are some major exceptions which we label $\Mcore^{\text{high-mem}}$ like \cspec with $\Mcore$ up to $30~\mathrm{GByte}$ and \dream exceeding $100~\mathrm{GByte}$ per core in its highest-resolution mode.
+There are some major exceptions which we label $\Mcore^{\text{high-mem}}$ like \cspec with $\Mcore$ up to $30~\mathrm{GByte}$ and \dream exceeding $50~\mathrm{GByte}$ per core in its highest-resolution mode.
 \magic is also in the $\Mcore^{\text{high-mem}}$ class, but the precise requirement depends on how the combination of rotation angles is handled.\footnote{The figures in Tab.~\ref{tab:hardware-magic} do \emph{not} explicitly include handling of multiple angles or merging, unless it is covered by the generic factor $\Nworkspace$.}
 
 It is worth noting that a large part of the huge memory requirements for \dream and \magic come from the large number of detector pixels resulting in a large $\Nspec$.

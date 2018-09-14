@@ -21,7 +21,7 @@ configs['BEER'] = {
     'use':[0.7, 0.2, 0.1]}
 
 configs['BIFROST'] = {
-    'phases':[5000],
+    'phases':[50000],
     'name':['high-flux', 'average'],
     'rate':[1e6, 1e5],
     'count':[1e6, 1e6], # TODO
@@ -37,7 +37,7 @@ configs['CSPEC'] = {
     'use':[0.2, 0.8]} # TODO get numbers from Pascale
 
 configs['DREAM'] = {
-    'phases':[4000000,12000000],
+    'phases':[762000,2167000],
     'name':['high-resolution', 'medium', 'high-flux'],
     'rate':[1.3e6, 1e7, 7.5e7],
     'count':[5e8, 5e8, 5e8], # high resolution is 10 minutes per run
