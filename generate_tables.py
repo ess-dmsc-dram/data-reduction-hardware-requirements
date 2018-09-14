@@ -22,11 +22,11 @@ configs['BEER'] = {
 
 configs['BIFROST'] = {
     'phases':[50000],
-    'name':['high-flux', 'average'],
-    'rate':[1e6, 1e5],
-    'count':[1e6, 1e6], # TODO
-    'num_bin':[110, 850], #TODO
-    'use':[0.2, 0.8]}
+    'name':['high-resolution', 'medium-flux', 'high-flux', 'elastic-high-resolution', 'elastic-medium-flux', 'elastic-high-flux'], # elastic refers to case where elastic line is measured
+    'rate':[1e5, 1e5, 1e5, 5e6, 5e6, 5e6], # in practice not scaling much with flux since sample size is adjusted
+    'count':[1e6, 1e6, 1e6, 5e7, 5e7, 5e7], # typically 5s to O(min), typically 30 s (using 10 s as worst case here), sample size used to compensate resolution/flux
+    'num_bin':[7000, 1000, 250, 7000, 1000, 250],
+    'use':[0.2, 0.25, 0.25, 0.1, 0.1, 0.1]}
 
 configs['CSPEC'] = {
     'phases':[400000,750000],

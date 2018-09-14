@@ -142,10 +142,10 @@ Details for this and other parameters are listed in Sec.~\ref{sec:script-based-r
     Instrument & Pixel count day 1 & Pixel count final & Comment\\
     \hline
     \beer & 200k & 400k & not including SANS upgrade\\
-    \bifrost & ? & 50k & 2--4 scan positions\\
+    \bifrost & 50k & 50k & 2--4 scan positions\\
     \cspec & 400k & 750k \\
     % 1.25*32*6.2/(0.003*0.006) = 14000k
-    \dream & 4000 & 12000k & estimated\footnote{We did not yet receive pixel counts from \dream, but \magic uses same technology with a pixel size of $3~\mathrm{mm} \times 6~\mathrm{mm}$ with 32 voxel layers. Full coverage is $5.11~\mathrm{sr}$ with a sample-detector distance of $1.25~\mathrm{m}$. Day-1 coverage is $1.81~\mathrm{sr}$.}\\
+    \dream & 762k & 2167k & maybe more?\footnote{This appears to be a moving target and no one really knows. Current ``full coverage'' is $5.11~\mathrm{sr}$ with a sample-detector distance of $1.25~\mathrm{m}$. Day-1 coverage is $1.81~\mathrm{sr}$.}\\
     \estia & 250k & 500k \\
     \loki & 750k & 1500k \\
     \magic & 623k & 1114k & 2--3 scan positions \\
@@ -205,10 +205,10 @@ where $N_{\text{frame}}^{\text{max}}$ is from Tab.~\ref{tab:consumption-rate} an
 The constant $a$ is obtained from a 2D fit to the data in Tab.~\ref{tab:consumption-rate}, excluding the SANS2D data point at $10^5$.
 We require $R_{\text{live}} > 1$ to be able to support live reduction without MPI.
 In Fig.~\ref{fig:live-reduction-no-mpi} we show the implications for the first ESS instruments, depending on the accelerator power.
-12 out of the 19 cases given in these figures can be handled even with high accelerator power of more than 3 MW.
+14 out of the 21 cases given in these figures can be handled even with high accelerator power of more than 3 MW.
 The \emph{reference-high-flux} configuration for \estia is just used for very short and infrequent time periods and may turn out not to be the most relevant case.
 With the exception of \dream, we seem to be able to handle and least one operating mode up to medium source power, but generally the high-flux operating modes cause trouble.
-However, we will definitely require MPI support in live reduction for \emph{all} configurations of \dream from day one.
+However, we will definitely require MPI support in live reduction for \emph{most} configurations of \dream from day one.
 We have not yet implemented the MPI version of the Kafka listener --- benchmark results and hardware requirements for this can will be provided once it is available.
 
 \begin{figure}
@@ -220,8 +220,6 @@ We require $R_{\text{live}} > 1$ to be able to handle the data.
 A point on a graph that lies below the dashed red line implies that the rate cannot be handled anymore.
 We plot several different instrument configurations which differ in their event rate.
 The configuration names for \loki refer to the collimation length, which influences the event rate.
-For \bifrost the pixel count is very low and we are not confident that we can extrapolate the scaling benchmarks from Tab.~\ref{tab:consumption-rate} this far.
-We have therefore excluded the panel for \bifrost but expect that the rate can be handled even at a power of $5~\mathrm{MW}$.
 The imaging beamline \odin is a special case and has thus also been excluded from this figure.
 }
 \end{figure}
@@ -269,6 +267,8 @@ Considering the projected duration of a single run $\Trun$ for design-power even
 Based on this equation, we give example requirements for various instrument configurations in Fig.~\ref{fig:interactive-ram}.
 Notable exceptions to this are the inelastic beamlines and the single-crystal beamlines, if we consider merging data from all sample rotation angles.
 Traditionally single crystal diffraction and inelastic scattering have the highest memory requirements but it is currently unclear whether this merge step would be done in \mantid.
+It is however not unlikely that we will require at least some of it in \mantid, e.g., for a visualization during the experiment.
+A few specialized machines with of the order of $1~\mathrm{TByte}$ RAM or are likely to be required.
 
 \begin{figure}
   \centering
@@ -280,7 +280,7 @@ The powder and single crystal diffractometers \dream, \magic, and \beer show an 
 This is probably not a real and realistic requirement, see the discussion in Sec.~\ref{sec:script-based-results}.
 The worst-case assumption that a histogram-representation for all workspaces is required leads to a rather high baseline requirement --- scaling with the total event count only becomes visible near $10^9$ events and above.
 Excluding the special cases listed above, the required memory will mostly not exceed $256~\mathrm{GByte}$ or up to $1~\mathrm{TByte}$ for large runs with $10^{10}$ events.
-The requirement can be lowered further by reducing $\Nworkspace$ and/or by avoiding binning of most workspaces, i.e., working purely in event mode.
+The requirement can potentially be lowered further by reducing $\Nworkspace$ and/or by avoiding binning of most workspaces, i.e., working purely in event mode.
 }
 \end{figure}
 
@@ -497,8 +497,9 @@ The resulting data for the given parameters can be found in Tabs.~\ref{tab:hardw
     & high-flux & 2000 \\
     \hline
     \multirow{1}{*}{\bifrost}
-    & average & 850\\
-    & high-flux & 110 & is highest flux always lowest resolution?\\
+    & high-resolution & 7000 & \\
+    & medium-flux & 1000 & \\
+    & high-flux & 250 & \\
     \hline
     \multirow{1}{*}{\cspec}
     & (all) & 1000 & no large resolution variation possible? \\

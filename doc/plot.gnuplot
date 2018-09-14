@@ -51,7 +51,7 @@ set samples 1000
 set xla "MW" offset 0,1
 set log y
 set yla "R_{live}" offset 3
-set multiplot layout 3,2
+set multiplot layout 4,2
 set title "LoKI" offset 0,-0.5
 p \
   Rlive(1e7*x/5,   1500000) w l ti "3m-high-flux", \
@@ -76,14 +76,14 @@ p \
   1.0 lc rgb "red" lw 2 dt 2 noti
 set title "MAGIC"
 p \
-  Rlive(1e7*x/5, 2880000) w l ti "high-flux", \
-  Rlive(1e6*x/5, 2880000) w l ti "normal",\
+  Rlive(1e7*x/5, 1114000) w l ti "high-flux", \
+  Rlive(1e6*x/5, 1114000) w l ti "normal",\
   1.0 lc rgb "red" lw 2 dt 2 noti
 set title "DREAM"
 p \
-  Rlive(7.5e7*x/5, 12000000) w l ti "high-flux", \
-  Rlive(1e7*x/5,   12000000) w l ti "medium-resolution", \
-  Rlive(1.3e6*x/5, 12000000) w l ti "high-resolution",\
+  Rlive(7.5e7*x/5, 2167000) w l ti "high-flux", \
+  Rlive(1e7*x/5,   2167000) w l ti "medium-resolution", \
+  Rlive(1.3e6*x/5, 2167000) w l ti "high-resolution",\
   1.0 lc rgb "red" lw 2 dt 2 noti
 set title "BEER"
 p \
@@ -91,10 +91,11 @@ p \
   Rlive(2e6*x/5, 400000) w l ti "medium-resolution-multiplexing", \
   Rlive(3e5*x/5, 400000) w l ti "medium-resolution",\
   1.0 lc rgb "red" lw 2 dt 2 noti
-#set title "BIFROST"
-#p \
-#  Rlive(1e6*x/5, 5000) w l ti "high-flux", \
-#  Rlive(1e5*x/5, 5000) w l ti "average"
+set title "BIFROST"
+p \
+  Rlive(1e5*x/5, 50000) w l ti "any-without-elastic", \
+  Rlive(5e6*x/5, 50000) w l ti "any-eleastic", \
+  1.0 lc rgb "red" lw 2 dt 2 noti
 unset multiplot
 
 
@@ -116,15 +117,16 @@ interactive_ram(Nspec, Nbin, Nevent)=2 + (Nspec*256 + (5*24*Nspec*Nbin + 5*16*Ne
 p \
   interactive_ram(400000, 8500, x)  w l lc 1 dt 1 ti 'BEER-medium-flux', \
   interactive_ram(400000, 2000, x)  w l lc 1 dt 2 ti 'BEER-high-flux', \
-  interactive_ram(50000, 850, x)    w l lc 2 dt 1 ti 'BIFROST-average', \
-  interactive_ram(50000, 110, x)    w l lc 2 dt 2 ti 'BIFROST-high-flux', \
+  interactive_ram(50000, 7000, x)    w l lc 2 dt 1 ti 'BIFROST-high-resolution', \
+  interactive_ram(50000, 1000, x)    w l lc 2 dt 2 ti 'BIFROST-medium-flux', \
+  interactive_ram(50000, 250, x)    w l lc 2 dt 3 ti 'BIFROST-high-flux', \
   interactive_ram(750000, 1000, x)  w l lc 3 dt 1 ti 'CSPEC', \
-  interactive_ram(12000000, 71000, x) w l lc 4 dt 1 ti 'DREAM-high-resolution', \
-  interactive_ram(12000000, 10000, x) w l lc 4 dt 2 ti 'DREAM-medium', \
-  interactive_ram(12000000, 1420, x)  w l lc 4 dt 3 ti 'DREAM-high-flux', \
+  interactive_ram(2167000, 71000, x) w l lc 4 dt 1 ti 'DREAM-high-resolution', \
+  interactive_ram(2167000, 10000, x) w l lc 4 dt 2 ti 'DREAM-medium', \
+  interactive_ram(2167000, 1420, x)  w l lc 4 dt 3 ti 'DREAM-high-flux', \
   interactive_ram(500000, 450, x)     w l lc 5 dt 1 ti 'ESTIA', \
   interactive_ram(1500000, 240, x)    w l lc 6 dt 1 ti 'LoKI', \
-  interactive_ram(2880000, 7100, x)   w l lc 7 dt 1 ti 'MAGIC'
+  interactive_ram(1114000, 7100, x)   w l lc 7 dt 1 ti 'MAGIC'
 
 #set xra[1e5:2e7]
 #set log x
